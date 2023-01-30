@@ -1,0 +1,386 @@
+{
+  "parameters": {
+    "format": "json",
+    "api-version": "1.0",
+    "RouteDirectionsRequest": {
+      "waypoints": [{
+        "latitude": 47.614988,
+        "longitude": -122.3368,
+        "isVia": false
+      }, {
+        "latitude": 47.606356,
+        "longitude": -122.316067,
+        "isVia": false
+      }],
+      "travelMode": "driving",
+      "optimize": "fastestWithoutTraffic",
+      "optimizeWaypoints": false,
+      "avoid": [
+        "highways"
+      ],
+      "routeInfo": [
+        "routePath"
+      ]
+    }
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "routes": [{
+          "id": "v70,h1207959581,i0,a0,cen-US,dAAAAAAAAAAA1,y1,s1,m1,o1,t4,wWrdB7bfOR0C9UpYhjpVewA2~ACIhhzFprSUBAADgAYsYlD4B0~N3RoIEF2ZQ2~~~~~~~~v12,w393KEp3NR0ASFhVxOpRewA2~ACIhhzEJBSYBAADgAaehWT4B0~RSBKZWZmZXJzb24gU3Q1~~~~~~~~v12,k0,qatt:1",
+          "summary": {
+            "lengthInMeters": 1147,
+            "travelTimeInSeconds": 162,
+            "trafficDelayInSeconds": 0
+          },
+          "bbox": [
+            47.605783,
+            -122.337079,
+            47.615446,
+            -122.316067
+          ],
+          "trafficCongestion": "None",
+          "trafficDataUsed": "None",
+          "routeLegs": [{
+            "description": "Olive Way, Boren Ave",
+            "departureTime": "2023-02-06T05:40:47.192Z",
+            "arrivalTime": "2023-02-06T05:42:47.192Z",
+            "travelDistance": 1.432882,
+            "travelDuration": 562,
+            "actualStart": {
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  -122.337079,
+                  47.614849
+                ]
+              }
+            },
+            "actualEnd": {
+              "geometry": {
+                "type": "Point",
+                "coordinates": [
+                  -122.316067,
+                  47.606195
+
+                ]
+              }
+            },
+            "itineraryItems": [{
+              "compassDirection": "southeast",
+              "details": [{
+                "compassDegrees": 120,
+                "endPathIndices": [
+                  1
+                ],
+                "maneuverType": "DepartStart",
+                "mode": "Driving",
+                "names": [
+                  "7th Ave"
+                ],
+                "roadType": "Arterial",
+                "startPathIndices": [
+                  0
+                ]
+              }],
+              "exit": "",
+              "hints": "",
+              "instruction": {
+                "formattedText": "<Action>Head</Action> <CmpsDir>southeast</CmpsDir> on <RoadName>7th Ave</RoadName> toward <Toward>Stewart St</Toward>",
+                "maneuverType": "DepartStart",
+                "text": "Head southeast on 7th Ave toward Stewart St"
+              },
+              "maneuverPoint": {
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    -122.337079,
+                    47.614849
+                  ]
+                }
+              },
+              "realTimeTransitDelay": 0,
+              "sideOfStreet": "Unknown",
+              "towardsRoadName": "Stewart St",
+              "travelDistance": 0.123031,
+              "travelDuration": 65,
+              "travelMode": "Driving"
+            },
+              {
+                "compassDirection": "northeast",
+                "details": [{
+                  "compassDegrees": 66,
+                  "endPathIndices": [
+                    4
+                  ],
+                  "maneuverType": "TurnLeft",
+                  "names": [
+                    "Olive Way"
+                  ],
+                  "roadType": "Arterial",
+                  "startPathIndices": [
+                    1
+                  ]
+                }],
+                "exit": "",
+                "hints": "",
+                "instruction": {
+                  "formattedText": "<Action>Turn</Action> <TurnDir>left</TurnDir> onto <RoadName>Olive Way</RoadName>",
+                  "maneuverType": "TurnLeft",
+                  "text": "Turn left onto Olive Way"
+                },
+                "maneuverPoint": {
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -122.335184,
+                      47.6136
+                    ]
+                  }
+                },
+                "sideOfStreet": "Unknown",
+                "travelDistance": 0.245442,
+                "travelDuration": 87
+
+              },
+              {
+                "compassDirection": "southeast",
+                "details": [{
+                  "compassDegrees": 137,
+                  "endPathIndices": [
+                    6
+                  ],
+                  "maneuverType": "TurnRight",
+                  "mode": "Driving",
+                  "names": [
+                    "Boren Ave"
+                  ],
+                  "roadType": "Arterial",
+                  "startPathIndices": [
+                    4
+                  ]
+                }],
+                "exit": "",
+                "hints": "",
+                "instruction": {
+                  "formattedText": "<Action>Turn</Action> <TurnDir>right</TurnDir> onto <RoadName>Boren Ave</RoadName>",
+                  "maneuverType": "TurnRight",
+                  "text": "Turn right onto Boren Ave"
+                },
+                "maneuverPoint": {
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      -122.330738,
+                      47.615446
+                    ]
+                  }
+                },
+                "sideOfStreet": "Unknown",
+                "travelDistance": 0.786035,
+                "travelDuration": 257
+              },
+              {
+                "compassDirection": "east",
+                "details": [{
+                  "compassDegrees": 68,
+                  "endPathIndices": [
+                    8
+                  ],
+                  "maneuverType": "TurnLeft",
+                  "mode": "Driving",
+                  "names": [
+                    "Jefferson St"
+                  ],
+                  "roadType": "Street",
+                  "startPathIndices": [
+                    6
+                  ]
+                }],
+                "exit": "",
+                "hints": "",
+                "instruction": {
+                  "formattedText": "<Action>Turn</Action> <TurnDir>left</TurnDir> onto <RoadName>Jefferson St</RoadName>",
+                  "maneuverType": "TurnLeft",
+                  "text": "Turn left onto Jefferson St"
+                },
+                "maneuverPoint": {
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      47.605783,
+                      -122.321888
+                    ]
+                  }
+                },
+                "sideOfStreet": "Unknown",
+                "travelDistance": 0.060894,
+                "travelDuration": 57
+              },
+              {
+                "compassDirection": "east",
+                "details": [{
+                  "compassDegrees": 89,
+                  "endPathIndices": [
+                    10
+                  ],
+                  "maneuverType": "RoadNameChange",
+                  "names": [
+                    "E Jefferson St"
+                  ],
+                  "roadType": "Arterial",
+                  "startPathIndices": [
+                    8
+                  ]
+                }],
+                "exit": "",
+                "instruction": {
+                  "formattedText": "<Action>Road name changes</Action> to <RoadName>E Jefferson St</RoadName>",
+                  "maneuverType": "RoadNameChange",
+                  "text": "Road name changes to E Jefferson St"
+                },
+                "maneuverPoint": {
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      47.606221,
+                      -122.320754
+                    ]
+                  }
+                },
+                "sideOfStreet": "Unknown",
+                "travelDistance": 0.21748,
+                "travelDuration": 94
+              },
+              {
+                "compassDirection": "east",
+                "details": [{
+                  "compassDegrees": 90,
+                  "endPathIndices": [
+                    10
+                  ],
+                  "maneuverType": "ArriveFinish",
+                  "mode": "Driving",
+                  "names": [
+                    "E Jefferson St"
+                  ],
+                  "roadType": "Arterial",
+                  "startPathIndices": [
+                    10
+                  ]
+                }],
+                "exit": "",
+                "hints": [{
+                  "hintType": "PreviousIntersection",
+                  "text": "The last intersection before your destination is 12th Ave"
+                },
+                  {
+                    "hintType": "NextIntersection",
+                    "text": "If you reach 13th Ave, you've gone too far"
+                  }
+                ],
+                "instruction": {
+                  "formattedText": "<Action>Arrive</Action> at <WaypointName>E Jefferson St</WaypointName> on the left",
+                  "maneuverType": "ArriveFinish",
+                  "text": "Arrive at E Jefferson St on the left"
+                },
+                "maneuverPoint": {
+                  "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                      47.606195,
+                      -122.316067
+                    ]
+                  }
+                },
+                "sideOfStreet": "Left",
+                "travelDistance": 0,
+                "travelDuration": 0
+              }
+            ],
+            "routeSubLegs": [{
+              "endWaypoint": {
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    47.606195,
+                    -122.316067
+                  ]
+                },
+                "description": "E Jefferson St",
+                "isVia": false,
+                "routePathIndex": 10
+              },
+              "startWaypoint": {
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    47.614849,
+                    -122.337079
+                  ]
+                },
+                "description": "7th Ave",
+                "isVia": false,
+
+                "routePathIndex": 0
+              },
+              "travelDistance": 1.432882,
+              "travelDuration": 562
+            }]
+          }],
+          "routePath": {
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -122.337078,
+                  47.614849
+                ],
+                [
+                  -122.335183,
+                  47.6136
+                ],
+                [
+                  -122.334985,
+                  47.613686
+                ],
+                [
+                  -122.331891,
+                  47.615039
+                ],
+                [
+                  -122.330738,
+                  47.615445
+                ],
+                [
+                  -122.330526,
+                  47.615212
+                ],
+                [
+                  -122.321888,
+                  47.605783
+                ],
+                [
+                  -122.321837,
+                  47.605803
+                ],
+                [
+                  -122.320754,
+                  47.606221
+                ],
+                [
+                  -122.320674,
+                  47.606222
+                ],
+                [
+                  -122.316067,
+                  47.606194
+                ]
+              ]
+            }
+          }
+        }]
+      }
+    }
+  }
+}

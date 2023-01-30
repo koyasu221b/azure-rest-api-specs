@@ -1,0 +1,83 @@
+{
+  "parameters": {
+    "format": "json",
+    "api-version": "1.0",
+    "routeDirectionsBatchRequest": {
+      "batchItems": [{
+        "waypoints": [{
+          "latitude": 47.614988,
+          "longitude": -122.3368,
+          "isVia": false
+        }, {
+          "latitude": 47.606356,
+          "longitude": -122.316067,
+          "isVia": false
+        }],
+        "maxSolutions": 5
+      },
+        {
+          "waypoints": [{
+            "latitude": 47.614988,
+            "longitude": -122.3368,
+            "isVia": false
+          }, {
+            "latitude": 47.606356,
+            "longitude": -122.316067,
+            "isVia": false
+          }],
+          "travelMode": "driving",
+          "optimize": "fastestWithoutTraffic",
+          "optimizeWaypoints": false,
+          "avoid": [
+            "highways"
+          ],
+          "routeInfo": [
+            "routePath"
+          ]
+        }
+      ]
+    }
+  },
+  "responses": {
+    "200": {
+      "headers": {},
+      "body": {
+        "batchItems": [{
+          "statusCode": 400,
+          "response": {
+            "error": {
+              "code": "400 BadRequest",
+              "message": "maxSolutions parameter value should be between 1 and 3 inclusive"
+            }
+          }
+        },
+          {
+            "statusCode": 200,
+            "response": {
+              "routes": [{
+                "summary": {
+                  "lengthInMeters": 1147,
+                  "travelTimeInSeconds": 162,
+                  "trafficDelayInSeconds": 0
+                }
+              }]
+            }
+          }
+        ],
+        "summary": {
+          "successfulRequests": 1,
+          "totalRequests": 2
+        }
+      }
+    },
+    "408": {
+      "headers": {},
+      "body": {
+        "error": {
+          "code": "408 Timeout",
+          "message": "Timeout: The request took longer to finish than the maximum amount of time defined in the api."
+        }
+      }
+    }
+  }
+}

@@ -99,14 +99,14 @@
     }
   },
   "paths": {
-    "/route/calculation": {
+    "/route/directions": {
       "post": {
         "description": "**Applies to**: see pricing [tiers](https://aka.ms/AzureMapsPricingTier).\n\n\nReturns a route between an origin and a destination, passing through waypoints if they are specified. The route will take into account factors such as current traffic and the typical road speeds on the requested day of the week and time of day.\n\nInformation returned includes the distance, estimated travel time, and a representation of the route geometry. Additional routing information such as optimized waypoint order or turn by turn instructions is also available, depending on the options selected.\n\n",
-        "operationId": "Route_CalculateRoute",
-        "x-ms-client-name": "CalculateRoute",
+        "operationId": "Route_PostRouteDirections",
+        "x-ms-client-name": "Route_PostRouteDirections",
         "x-ms-examples": {
           "Successfully retrieve a route between an origin and a destination with additional parameters in the body": {
-            "$ref": "./examples/CalculateRoute.json"
+            "$ref": "./examples/PostRouteDirections.json"
           }
         },
         "parameters": [
@@ -117,12 +117,12 @@
             "$ref": "#/parameters/Accept-Language"
           },
           {
-            "name": "CalculateRouteRequest",
+            "name": "RouteDirectionsRequest",
             "in": "body",
-            "description": "Request body of CalculateRoute API in JSON format.",
+            "description": "Request body of RouteDirections API in JSON format.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/CalculateRouteRequest"
+              "$ref": "#/definitions/RouteDirectionsRequest"
             }
           }
         ],
@@ -130,7 +130,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/CalculateRouteResponse"
+              "$ref": "#/definitions/RouteDirectionsResponse"
             }
           },
           "default": {
@@ -139,18 +139,18 @@
         }
       }
     },
-    "/route/calculation:batch": {
-      "get": {
-        "description": "**Applies to**: see pricing [tiers](https://aka.ms/AzureMapsPricingTier).\n\n### Download Asynchronous Batch Results\nTo download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:\n\n```\nhttps://atlas.microsoft.com/route/calculation/batch/{batch-id}?api-version=1.0&subscription-key={subscription-key}\n```\nHere's the typical sequence of operations for downloading the batch results:\n1. Client sends a `GET` request using the _download URL_.\n2. The server will respond with one of the following:\n    \n    > HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.\n\n    > HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.\n\n\n\n### Batch Response Model\nThe returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:\n\n  - [`CalculateRouteResponse`](https://docs.microsoft.com/rest/api/maps/route/getroutedirections#routedirections) - If the query completed successfully.\n\n  - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.\n\n\nHere's a sample Batch Response with 1 _successful_ and 1 _failed_ result:\n\n\n```json\n{\n    \"summary\": {\n        \"successfulRequests\": 1,\n        \"totalRequests\": 2\n    },\n    \"batchItems\": [\n        {\n            \"statusCode\": 200,\n            \"response\": {\n                \"routes\": [\n                    {\n                        \"summary\": {\n                            \"lengthInMeters\": 1758,\n                            \"travelTimeInSeconds\": 387,\n                            \"trafficDelayInSeconds\": 0,\n                            \"departureTime\": \"2018-07-17T00:49:56+00:00\",\n                            \"arrivalTime\": \"2018-07-17T00:56:22+00:00\"\n                        },\n                        \"legs\": [\n                            {\n                                \"summary\": {\n                                    \"lengthInMeters\": 1758,\n                                    \"travelTimeInSeconds\": 387,\n                                    \"trafficDelayInSeconds\": 0,\n                                    \"departureTime\": \"2018-07-17T00:49:56+00:00\",\n                                    \"arrivalTime\": \"2018-07-17T00:56:22+00:00\"\n                                },\n                                \"points\": [\n                                    {\n                                        \"latitude\": 47.62094,\n                                        \"longitude\": -122.34892\n                                    },\n                                    {\n                                        \"latitude\": 47.62094,\n                                        \"longitude\": -122.3485\n                                    },\n                                    {\n                                        \"latitude\": 47.62095,\n                                        \"longitude\": -122.3476\n                                    }\n                                ]\n                            }\n                        ],\n                        \"sections\": [\n                            {\n                                \"startPointIndex\": 0,\n                                \"endPointIndex\": 40,\n                                \"sectionType\": \"TRAVEL_MODE\",\n                                \"travelMode\": \"bicycle\"\n                            }\n                        ]\n                    }\n                ]\n            }\n        },\n        {\n            \"statusCode\": 400,\n            \"response\":\n            {\n                \"error\":\n                {\n                    \"code\": \"400 BadRequest\",\n                    \"message\": \"Bad request: one or more parameters were incorrectly specified or are mutually exclusive.\"\n                }\n            }\n        }\n    ]\n}\n```",
-        "operationId": "Route_CalculateRouteBatch",
+    "/route/directions:batch": {
+      "post": {
+        "description": "**Route Directions Batch API**\n\n\n**Applies to**: see pricing [tiers](https://aka.ms/AzureMapsPricingTier).\n\n\n\nThe Route Directions Batch API sends batches of queries to [Route Directions API](https://docs.microsoft.com/rest/api/maps/route/postroutedirections) using just a single API call. You can call Route Directions Batch API to run either asynchronously (async) or synchronously (sync). The async API allows caller to batch up to **700** queries and sync API up to **100** queries.\n### Submit Asynchronous Batch Request\nThe Asynchronous API is appropriate for processing big volumes of relatively complex route requests\n- It allows the retrieval of results in a separate call (multiple downloads are possible).\n- The asynchronous API is optimized for reliability and is not expected to run into a timeout.\n- The number of batch items is limited to **700** for this API.\n\nWhen you make a request by using async request, by default the service returns a 202 response code along a redirect URL in the Location field of the response header. This URL should be checked periodically until the response data or error information is available.\nThe asynchronous responses are stored for **14** days. The redirect URL returns a 404 response if used after the expiration period.\n\nPlease note that asynchronous batch request is a long-running request. Here's a typical sequence of operations:\n1. Client sends a Route Directions Batch `POST` request to Azure Maps\n2. The server will respond with one of the following:\n\n    > HTTP `202 Accepted` - Batch request has been accepted.\n\n    > HTTP `Error` - There was an error processing your Batch request. This could either be a `400 Bad Request` or any other `Error` status code.\n\n3. If the batch request was accepted successfully, the `Location` header in the response contains the URL to download the results of the batch request.\n    This status URI looks like following:\n\n``` GET https://atlas.microsoft.com/route/directions/batch/{batch-id}?api-version=1.0 ```\nNote:- Please remember to add AUTH information (subscription-key/azure_auth - See [Security](#security)) to the _status URI_ before running it. <br>\n4. Client issues a `GET` request on the _download URL_ obtained in Step 3 to download the batch results.\n\n### POST Body for Batch Request\nTo send the _route directions_ queries you will use a `POST` request where the request body will contain the `batchItems` array in `json` format and the `Content-Type` header will be set to `application/json`. Here's a sample request body containing 3 _route directions_ queries:\n\n\n```json\n{\n    \"batchItems\": [\n        { \"query\": \"?query=47.620659,-122.348934:47.610101,-122.342015&travelMode=bicycle&routeType=eco&traffic=false\" },\n        { \"query\": \"?query=40.759856,-73.985108:40.771136,-73.973506&travelMode=pedestrian&routeType=shortest\" },\n        { \"query\": \"?query=48.923159,-122.557362:32.621279,-116.840362\" }\n    ]\n}\n```\n\nA _route directions_ query in a batch is just a partial URL _without_ the protocol, base URL, path, api-version and subscription-key. It can accept any of the supported _route directions_ [URI parameters](https://docs.microsoft.com/rest/api/maps/route/getroutedirections#uri-parameters). The string values in the _route directions_ query must be properly escaped (e.g. \" character should be escaped with \\\\ ) and it should also be properly URL-encoded.\n\n\nThe async API allows caller to batch up to **700** queries and sync API up to **100** queries, and the batch should contain at least **1** query.\n\n\n### Download Asynchronous Batch Results\nTo download the async batch results you will issue a `GET` request to the batch download endpoint. This _download URL_ can be obtained from the `Location` header of a successful `POST` batch request and looks like the following:\n\n```\nhttps://atlas.microsoft.com/route/directions/batch/{batch-id}?api-version=1.0&subscription-key={subscription-key}\n```\nHere's the typical sequence of operations for downloading the batch results:\n1. Client sends a `GET` request using the _download URL_.\n2. The server will respond with one of the following:\n    \n    > HTTP `202 Accepted` - Batch request was accepted but is still being processed. Please try again in some time.\n\n    > HTTP `200 OK` - Batch request successfully processed. The response body contains all the batch results.\n\n\n\n### Batch Response Model\nThe returned data content is similar for async and sync requests. When downloading the results of an async batch request, if the batch has finished processing, the response body contains the batch response. This batch response contains a `summary` component that indicates the `totalRequests` that were part of the original batch request and `successfulRequests`i.e. queries which were executed successfully. The batch response also includes a `batchItems` array which contains a response for each and every query in the batch request. The `batchItems` will contain the results in the exact same order the original queries were sent in the batch request. Each item in `batchItems` contains `statusCode` and `response` fields. Each `response` in `batchItems` is of one of the following types:\n\n  - [`RouteDirections`](https://docs.microsoft.com/rest/api/maps/route/getroutedirections#routedirections) - If the query completed successfully.\n\n  - `Error` - If the query failed. The response will contain a `code` and a `message` in this case.\n\n\nHere's a sample Batch Response with 1 _successful_ and 1 _failed_ result:\n\n\n```json\n{\n    \"summary\": {\n        \"successfulRequests\": 1,\n        \"totalRequests\": 2\n    },\n    \"batchItems\": [\n        {\n            \"statusCode\": 200,\n            \"response\": {\n                \"routes\": [\n                    {\n                        \"summary\": {\n                            \"lengthInMeters\": 1758,\n                            \"travelTimeInSeconds\": 387,\n                            \"trafficDelayInSeconds\": 0,\n                            \"departureTime\": \"2018-07-17T00:49:56+00:00\",\n                            \"arrivalTime\": \"2018-07-17T00:56:22+00:00\"\n                        },\n                        \"legs\": [\n                            {\n                                \"summary\": {\n                                    \"lengthInMeters\": 1758,\n                                    \"travelTimeInSeconds\": 387,\n                                    \"trafficDelayInSeconds\": 0,\n                                    \"departureTime\": \"2018-07-17T00:49:56+00:00\",\n                                    \"arrivalTime\": \"2018-07-17T00:56:22+00:00\"\n                                },\n                                \"points\": [\n                                    {\n                                        \"latitude\": 47.62094,\n                                        \"longitude\": -122.34892\n                                    },\n                                    {\n                                        \"latitude\": 47.62094,\n                                        \"longitude\": -122.3485\n                                    },\n                                    {\n                                        \"latitude\": 47.62095,\n                                        \"longitude\": -122.3476\n                                    }\n                                ]\n                            }\n                        ],\n                        \"sections\": [\n                            {\n                                \"startPointIndex\": 0,\n                                \"endPointIndex\": 40,\n                                \"sectionType\": \"TRAVEL_MODE\",\n                                \"travelMode\": \"bicycle\"\n                            }\n                        ]\n                    }\n                ]\n            }\n        },\n        {\n            \"statusCode\": 400,\n            \"response\":\n            {\n                \"error\":\n                {\n                    \"code\": \"400 BadRequest\",\n                    \"message\": \"Bad request: one or more parameters were incorrectly specified or are mutually exclusive.\"\n                }\n            }\n        }\n    ]\n}\n```",
+        "operationId": "Route_PostRouteDirectionsBatch",
+        "x-ms-client-name": "Route_PostRouteDirectionsBatch",
         "x-ms-long-running-operation": true,
         "x-ms-long-running-operation-options": {
           "final-state-via": "original-uri"
         },
-        "x-ms-client-name": "CalculateRouteBatch",
         "x-ms-examples": {
           "Successfully retrieve the status for the route calculation batch request": {
-            "$ref": "./examples/CalculateRouteBatch.json"
+            "$ref": "./examples/PostRouteDirectionsBatch.json"
           }
         },
         "parameters": [
@@ -161,18 +161,21 @@
             "$ref": "#/parameters/ApiVersion"
           },
           {
-            "$ref": "#/parameters/BatchId"
+            "name": "routeDirectionsBatchRequest",
+            "in": "body",
+            "description": "The list of route directions queries/requests to process. The list can contain a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BatchRequest"
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Batch request successfully processed. The response body contains all the batch results.",
             "schema": {
-              "$ref": "#/definitions/CalculateRouteBatchResponse"
+              "$ref": "#/definitions/RouteDirectionsBatchResponse"
             }
-          },
-          "202": {
-            "$ref": "../../../Common/preview/1.0/common.json#/responses/202Async"
           },
           "408": {
             "description": "Timeout: The request took longer to finish than the maximum amount of time defined in the api.",
@@ -189,24 +192,26 @@
     }
   },
   "definitions": {
-    "CalculateRouteRequest": {
+    "RouteDirectionsRequest": {
       "description": "This object contains parameters to call CalculateRoute",
       "type": "object",
       "required": ["waypoints"],
       "properties": {
         "waypoints": {
-          "description": "The Coordinates through which the route is calculated, delimited by a colon.  A minimum of two coordinates is required.  The first one is the origin and the last is the destination of the route. Optional coordinates in-between act as WayPoints in the route.  You can pass up to 150 WayPoints.",
-          "type": "string"
+          "description": "waypoints array",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WaypointAndViaWaypoint"
+          }
         },
         "travelMode": {
-          "description": "The mode of travel for the requested route. If not defined, default is 'driving'. Note that the requested travelMode may not be available for the entire route. Refer to the [list of supported driving/walking market](https://learn.microsoft.com/bingmaps/coverage/geographic-coverage) and [list of transit support in different markets](https://learn.microsoft.com/bingmaps/coverage/transit-coverage/).",
+          "description": "The mode of travel for the requested route.",
           "type": "string",
           "default": "driving",
           "enum": [
             "driving",
             "truck",
-            "walking",
-            "transit"
+            "walking"
           ],
           "x-ms-enum": {
             "name": "TravelMode",
@@ -223,10 +228,6 @@
               {
                 "value": "walking",
                 "description": "The returned routes are optimized for pedestrians, including the use of sidewalks."
-              },
-              {
-                "value": "transit",
-                "description": "The returned routes are optimized for public transportation, such as bus, train, ferry, and airline."
               }
             ]
           }
@@ -279,12 +280,12 @@
           }
         },
         "optimizeWaypoints": {
-          "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with optimize _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the waypoints in the given order and not allowed to be used in conjunction with routeRepresentation _none_.",
+          "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with optimize _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the waypoints in the given order and not allowed to be used in conjunction with routeRepresentation _none_. `Note`:This parameter is only available for the driving and Truck mode.",
           "type": "boolean",
           "default": false
         },
         "avoid": {
-          "description": "Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple items, for example, '\"avoid\": [\"motorways\", \"tollRoads\"]'. Noted that minimizeHighways/minimizeTollRoads/borderCrossing are not supported when travelMode=truck.",
+          "description": "Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple items, for example, '\"avoid\": [\"highways\", \"tollRoads\"]'. Noted that minimizeHighways/minimizeTollRoads/borderCrossing are not supported when travelMode=truck.",
           "type": "array",
           "items": {
             "type": "string",
@@ -294,6 +295,7 @@
               "ferries",
               "minimizeHighways",
               "minimizeTollRoads",
+              "tunnels",
               "borderCrossings"
             ],
             "x-ms-enum": {
@@ -302,7 +304,7 @@
               "values": [
                 {
                   "value": "highways",
-                  "description": "Avoids the use of highways in the route."
+                  "description": "Avoids the use of highways in the route.  `Note`:The parameter is available only for Driving and Walking travel mode"
                 },
                 {
                   "value": "tollRoads",
@@ -314,11 +316,15 @@
                 },
                 {
                   "value": "minimizeHighways",
-                  "description": "Minimizes (tries to avoid) the use of highways in the route. Note: If you specify more than one option for a road type, then the most restrictive option is used. For example, if you set the avoid parameter to both highways and minimizeHighways, the highways option is used and all highways are avoided."
+                  "description": "Minimizes (tries to avoid) the use of highways in the route. Note: If you specify more than one option for a road type, then the most restrictive option is used. For example, if you set the avoid parameter to both highways and minimizeHighways, the highways option is used and all highways are avoided. `Note`:The parameter is available only for Driving and Walking travel mode"
                 },
                 {
                   "value": "minimizeTollRoads",
                   "description": "Minimizes (tries to avoid) the use of toll roads in the route. Note: If you specify more than one option for a road type, then the most restrictive option is used. For example, if you set the avoid parameter to both tollRoads and minimizeTollRoads, the tollRoads option is used and all toll roads are avoided."
+                },
+                {
+                  "value": "tunnels",
+                  "description": "Avoids the use of tunnels in the route. `Note`:The parameter is available only for Truck travel mode"
                 },
                 {
                   "value": "borderCrossings",
@@ -329,15 +335,15 @@
           }
         },
         "routeInfo": {
-          "description": "Information of route being returned. Can specify multiple values such as \"routeInfo\": [\"routePath\", \"routeLegs\"].",
+          "description": "Information of route being returned. Can specify multiple values such as \"routeInfo\": [\"routePath\", \"excludeDetailedInstructions\"].",
           "type": "array",
           "default": ["all"],
           "items": {
             "type": "string",
             "enum": [
               "excludeItinerary",
+              "excludeDetailedInstructions",
               "routePath",
-              "transitStops",
               "routeSummariesOnly",
               "regionTravelSummary",
               "all"
@@ -351,12 +357,12 @@
                   "description": "Do not include detailed directions in the response. Detailed directions are provided as itinerary items and contain details such as written instructions and traffic location codes."
                 },
                 {
-                  "value": "routePath",
-                  "description": "Include a set of point (latitude and longitude) values that describe the route’s path in the response."
+                  "value": "excludeDetailedInstructions",
+                  "description": "Do not include detailed directions in the response in the itinerary items."
                 },
                 {
-                  "value": "transitStops",
-                  "description": "Include information about transit stops for transit routes."
+                  "value": "routePath",
+                  "description": "Include a set of point (latitude and longitude) values that describe the route’s path in the response."
                 },
                 {
                   "value": "routeSummariesOnly",
@@ -368,14 +374,14 @@
                 },
                 {
                   "value": "all",
-                  "description": "Used to specify the following attributes as a group: RoutePath | TransitStops | RoutePrimitives | ExcludeItinerary | ExcludeJourney | ReturnAllShapePoints."
+                  "description": "Used to specify the following attributes as a group: routePath | excludeItinerary."
                 }
               ]
             }
           }
         },
         "isVehicleCommercial": {
-          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.",
+          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.\n  `Note`: The parameter is available only for truck travel mode",
           "type": "boolean",
           "default": false
         },
@@ -397,45 +403,45 @@
           "maximum": 359
         },
         "vehicleLength": {
-          "description": "Length of the vehicle in meters. A value of 0 means that length restrictions are not considered.",
+          "description": "Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "vehicleWidth": {
-          "description": "Width of the vehicle in meters. A value of 0 means that width restrictions are not considered.",
+          "description": "Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "vehicleHeight": {
-          "description": "Height of the vehicle in meters. A value of 0 means that height restrictions are not considered.",
+          "description": "Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "vehicleWeight": {
-          "description": "Weight of the vehicle in kilograms.\n\n",
+          "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck travel mode.",
           "type": "integer",
           "default": 0
         },
         "vehicleMaxSpeed": {
-          "description": "Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. \n\n* A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.\n\n* A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour.",
+          "description": "Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. \n\n* A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.\n\n* A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour. `Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
         "vehicleAxleCount": {
-          "description": "Number of axles of the vehicle in kg. A value of 0 means that count of axle restriction is not considered.",
+          "description": "Number of axles of the vehicle in kg. A value of 0 means that count of axle restriction is not considered. `Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
         "vehicleAxleWeight": {
-          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.",
+          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck travel mode.",
           "type": "integer",
           "default": 0
         },
         "vehicleLoadType": {
-          "description": "Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. This parameter is currently only considered for travelMode=truck.",
+          "description": "Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. `Note`: The parameter is available only for truck mode.",
           "type": "string",
           "enum": [
             "USHazmatClass1",
@@ -508,15 +514,10 @@
         }
       }
     },
-    "CalculateRouteResponse": {
+    "RouteDirectionsResponse": {
       "description": "This object is returned from a successful CalculateRoute call",
       "type": "object",
       "properties": {
-        "formatVersion": {
-          "description": "Format Version property",
-          "type": "string",
-          "readOnly": true
-        },
         "routes": {
           "description": "Routes array",
           "type": "array",
@@ -524,27 +525,60 @@
           "items": {
             "$ref": "#/definitions/Route"
           }
+        }
+      }
+    },
+    "WaypointAndViaWaypoint": {
+      "description": "A route is defined by a set of waypoints",
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "description": "Latitude property",
+          "type": "number",
+          "format": "double"
         },
-        "optimizedWaypoints": {
-          "description": "Optimized sequence of waypoints. It shows the index from the user provided waypoint sequence for the original and optimized list. For instance, a response: \n\n```\n<optimizedWaypoints>\n<waypoint providedIndex=\"0\" optimizedIndex=\"1\"/>\n<waypoint providedIndex=\"1\" optimizedIndex=\"2\"/>\n<waypoint providedIndex=\"2\" optimizedIndex=\"0\"/>\n</optimizedWaypoints>\n```\n\nmeans that the original sequence is [0, 1, 2] and optimized sequence is [1, 2, 0]. Since the index starts by 0 the original is \"first, second, third\" while the optimized is \"second, third, first\".",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/RouteOptimizedWaypoint"
-          }
+        "longitude": {
+          "description": "Longitude property",
+          "type": "number",
+          "format": "double"
         },
-        "report": {
-          "$ref": "#/definitions/RouteReport"
+        "isVia": {
+          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
+          "type": "boolean",
+          "default": false
         }
       }
     },
     "Route": {
       "type": "object",
       "properties": {
+        "id": {
+          "description": "A unique ID for the resource.",
+          "type": "string",
+          "readOnly": true
+        },
         "summary": {
           "$ref": "#/definitions/RouteSummary"
         },
-        "legs": {
+        "bbox": {
+          "description": "Defines a rectangular area by using latitude and longitude boundaries that contain the corresponding route or location. A bounding box contains SouthLatitude, WestLongitude, NorthLatitude, and EastLongitude elements.",
+          "type": "array",
+          "readOnly": true,
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "trafficDataUsed": {
+          "description": "Real-time traffic data used to generate the route.",
+          "$ref": "#/definitions/TrafficDataUsed"
+        },
+        "trafficCongestion": {
+          "description": "The level of traffic congestion along the route.",
+          "$ref": "#/definitions/TrafficCongestion"
+        },
+        "routeLegs": {
           "description": "Legs array",
           "type": "array",
           "readOnly": true,
@@ -552,16 +586,13 @@
             "$ref": "#/definitions/RouteLeg"
           }
         },
-        "sections": {
-          "description": "Sections array",
+        "routePath": {
+          "description": "Route path array",
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/RouteSection"
+            "$ref": "#/definitions/RoutePath"
           }
-        },
-        "guidance": {
-          "$ref": "#/definitions/RouteGuidance"
         }
       }
     },
@@ -584,28 +615,6 @@
           "description": "Estimated delay in seconds caused by the real-time incident(s) according to traffic information. For routes planned with departure time in the future, delays is always 0.",
           "type": "integer",
           "readOnly": true
-        },
-        "departureTime": {
-          "$ref": "#/definitions/DepartureTime"
-        },
-        "arrivalTime": {
-          "$ref": "#/definitions/ArrivalTime"
-        }
-      }
-    },
-    "RouteOptimizedWaypoint": {
-      "description": "Optimized way point object.",
-      "type": "object",
-      "properties": {
-        "providedIndex": {
-          "description": "Way point index provided by the user.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "optimizedIndex": {
-          "description": "Optimized way point index from the system.",
-          "type": "integer",
-          "readOnly": true
         }
       }
     },
@@ -613,36 +622,17 @@
       "description": "A description of a part of a route, comprised of a list of points. Each additional waypoint provided in the request will result in an additional leg in the returned route.",
       "type": "object",
       "properties": {
-        "summary": {
-          "$ref": "#/definitions/RouteLegSummary"
+        "description": {
+          "description": "A short description of the route.",
+          "type": "string"
         },
-        "points": {
-          "description": "Points array",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "../../../Common/preview/1.0/common.json#/definitions/LatLongPair"
-          }
-        }
-      }
-    },
-    "RouteLegSummary": {
-      "description": "Summary object for route section.",
-      "type": "object",
-      "readOnly": true,
-      "properties": {
-        "lengthInMeters": {
-          "description": "Length In Meters property",
-          "type": "integer",
+        "travelDistance": {
+          "description": "The physical distance in meters covered by a route leg.",
+          "type": "number",
           "readOnly": true
         },
-        "travelTimeInSeconds": {
+        "travelDuration": {
           "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "trafficDelayInSeconds": {
-          "description": "Estimated delay in seconds caused by the real-time incident(s) according to traffic information. For routes planned with departure time in the future, delays is always 0.",
           "type": "integer",
           "readOnly": true
         },
@@ -652,573 +642,180 @@
         "arrivalTime": {
           "$ref": "#/definitions/ArrivalTime"
         },
-        "noTrafficTravelTimeInSeconds": {
-          "description": "Estimated travel time calculated as if there are no delays on the route due to traffic conditions (e.g. congestion). Included only if computeTravelTimeFor = all is used in the query.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "historicTrafficTravelTimeInSeconds": {
-          "description": "Estimated travel time calculated using time-dependent historic traffic data. Included only if computeTravelTimeFor = all is used in the query.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "liveTrafficIncidentsTravelTimeInSeconds": {
-          "description": "Estimated travel time calculated using real-time speed data. Included only if computeTravelTimeFor = all is used in the query.",
-          "type": "integer",
-          "readOnly": true
-        }
-      }
-    },
-    "RouteSection": {
-      "description": "Route sections contain additional information about parts of a route. Each section contains at least the elements `startPointIndex`, `endPointIndex`, and `sectionType`.",
-      "type": "object",
-      "properties": {
-        "startPointIndex": {
-          "description": "Index of the first point (offset 0) in the route this section applies to.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "endPointIndex": {
-          "description": "Index of the last point (offset 0) in the route this section applies to.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "sectionType": {
-          "$ref": "#/definitions/ResponseSectionType"
-        },
-        "travelMode": {
-          "$ref": "#/definitions/ResponseTravelMode"
-        },
-        "simpleCategory": {
-          "$ref": "#/definitions/SimpleCategory"
-        },
-        "effectiveSpeedInKmh": {
-          "description": "Effective speed of the incident in km/h, averaged over its entire length.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "delayInSeconds": {
-          "description": "Delay in seconds caused by the incident.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "magnitudeOfDelay": {
-          "x-ms-client-name": "delayMagnitude",
-          "$ref": "#/definitions/DelayMagnitude"
-        },
-        "tec": {
-          "$ref": "#/definitions/RouteSectionTec"
-        }
-      }
-    },
-    "RouteSectionTec": {
-      "description": "Details of the traffic event, using definitions in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can contain effectCode and causes elements.",
-      "type": "object",
-      "properties": {
-        "effectCode": {
-          "description": "The effect on the traffic flow. Contains a value in the tec001:EffectCode table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard. Can be used to color-code traffic events according to severity.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "causes": {
-          "description": "Causes array",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RouteSectionTecCause"
-          }
-        }
-      }
-    },
-    "RouteSectionTecCause": {
-      "description": "The cause of the traffic event. Can contain mainCauseCode and subCauseCode elements. Can be used to define iconography and descriptions.",
-      "type": "object",
-      "properties": {
-        "mainCauseCode": {
-          "description": "The main cause of the traffic event. Contains a value in the tec002:CauseCode table, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "subCauseCode": {
-          "description": "The subcause of the traffic event. Contains a value in the sub cause table defined by the mainCauseCode, as defined in the [TPEG2-TEC](https://www.iso.org/standard/63116.html) standard.",
-          "type": "integer",
-          "readOnly": true
-        }
-      }
-    },
-    "RouteInstruction": {
-      "description": "A set of attributes describing a maneuver, e.g. 'Turn right', 'Keep left', 'Take the ferry', 'Take the motorway', 'Arrive'.",
-      "type": "object",
-      "properties": {
-        "routeOffsetInMeters": {
-          "description": "Distance from the start of the route to the point of the instruction.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "travelTimeInSeconds": {
-          "description": "Estimated travel time up to the point corresponding to routeOffsetInMeters.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "point": {
-          "$ref": "../../../Common/preview/1.0/common.json#/definitions/LatLongPair"
-        },
-        "pointIndex": {
-          "description": "The index of the point in the list of polyline \"points\" corresponding to the point of the instruction.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "instructionType": {
-          "description": "Type of the instruction, e.g., turn or change of road form.",
-          "type": "string",
-          "enum": [
-            "TURN",
-            "ROAD_CHANGE",
-            "LOCATION_DEPARTURE",
-            "LOCATION_ARRIVAL",
-            "DIRECTION_INFO",
-            "LOCATION_WAYPOINT"
-          ],
-          "x-ms-enum": {
-            "name": "GuidanceInstructionType",
-            "modelAsString": true,
-            "values": [
-              {
-                "value": "TURN",
-                "name": "Turn",
-                "description": "Turn."
-              },
-              {
-                "value": "ROAD_CHANGE",
-                "name": "RoadChange",
-                "description": "Road Change."
-              },
-              {
-                "value": "LOCATION_DEPARTURE",
-                "name": "LocationDeparture",
-                "description": "Departure location."
-              },
-              {
-                "value": "LOCATION_ARRIVAL",
-                "name": "LocationArrival",
-                "description": "Arrival location."
-              },
-              {
-                "value": "DIRECTION_INFO",
-                "name": "DirectionInfo",
-                "description": "Direction information."
-              },
-              {
-                "value": "LOCATION_WAYPOINT",
-                "name": "LocationWaypoint",
-                "description": "Way point location."
-              }
-            ]
+        "actualStart": {
+          "description": "The Point (latitude and longitude) that was used as the actual starting location for the route leg. In most cases, the ActualStart is the same as the requested waypoint. However, if a waypoint is not close to a road, the Routes API chooses a location on the nearest road as the starting point of the route. This ActualStart element contains the latitude and longitude of this new location.",
+          "properties": {
+            "geometry": {
+              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+            }
           }
         },
-        "roadNumbers": {
-          "description": "The road number(s) of the next significant road segment(s) after the maneuver, or of the road(s) to be followed. Example: [\"E34\", \"N205\"]",
-          "type": "array",
-          "items": {
-            "type": "string",
-            "readOnly": true
-          },
-          "readOnly": true
-        },
-        "exitNumber": {
-          "description": "The number(s) of a highway exit taken by the current maneuver. If an exit has multiple exit numbers, they will be separated by \",\" and possibly aggregated by \"-\", e.g., \"10, 13-15\".",
-          "type": "string",
-          "readOnly": true
-        },
-        "street": {
-          "description": "Street name of the next significant road segment after the maneuver, or of the street that should be followed.",
-          "type": "string",
-          "readOnly": true
-        },
-        "signpostText": {
-          "description": "The text on a signpost which is most relevant to the maneuver, or to the direction that should be followed.",
-          "type": "string",
-          "readOnly": true
-        },
-        "countryCode": {
-          "description": "3-character [ISO 3166-1](https://www.iso.org/iso-3166-country-codes.html) alpha-3 country code. E.g. USA.",
-          "type": "string",
-          "readOnly": true
-        },
-        "stateCode": {
-          "description": "A subdivision (e.g., state) of the country, represented by the second part of an [ISO 3166-2](https://www.iso.org/standard/63546.html) code. This is only available for some countries like the US, Canada, and Mexico.",
-          "type": "string",
-          "readOnly": true
-        },
-        "junctionType": {
-          "description": "The type of the junction where the maneuver takes place. For larger roundabouts, two separate instructions are generated for entering and leaving the roundabout.",
-          "type": "string",
-          "readOnly": true,
-          "enum": [
-            "REGULAR",
-            "ROUNDABOUT",
-            "BIFURCATION"
-          ],
-          "x-ms-enum": {
-            "name": "JunctionType",
-            "modelAsString": true,
-            "values": [
-              {
-                "value": "REGULAR",
-                "description": "regular"
-              },
-              {
-                "value": "ROUNDABOUT",
-                "description": "roundabout"
-              },
-              {
-                "value": "BIFURCATION",
-                "description": "bifurcation"
-              }
-            ]
+        "actualEnd": {
+          "description": "The Point (latitude and longitude) that was used as the actual ending location for the route leg. In most cases, the ActualEnd is the same as the requested waypoint. However, if a waypoint is not close to a road, the Routes API chooses a location on the nearest road as the ending point of the route. This ActualEnd element contains the latitude and longitude of this new location.",
+          "properties": {
+            "geometry": {
+              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+            }
           }
         },
-        "turnAngleInDecimalDegrees": {
-          "x-ms-client-name": "turnAngleInDegrees",
-          "description": "Indicates the direction of an instruction. If junctionType indicates a turn instruction:\n\n  * 180 = U-turn\n  * [-179, -1] = Left turn\n  * 0 = Straight on (a '0 degree' turn)\n  * [1, 179] = Right turn\n\nIf junctionType indicates a bifurcation instruction:\n\n  * <0 - keep left\n  * \\>0 - keep right",
-          "type": "integer",
-          "readOnly": true
-        },
-        "roundaboutExitNumber": {
-          "description": "This indicates which exit to take at a roundabout.",
-          "type": "string",
-          "readOnly": true
-        },
-        "possibleCombineWithNext": {
-          "description": "It is possible to optionally combine the instruction with the next one. This can be used to build messages like \"Turn left and then turn right\".",
-          "type": "boolean",
-          "readOnly": true
-        },
-        "drivingSide": {
-          "description": "Indicates left-hand vs. right-hand side driving at the point of the maneuver.",
-          "type": "string",
-          "readOnly": true,
-          "enum": [
-            "LEFT",
-            "RIGHT"
-          ],
-          "x-ms-enum": {
-            "name": "DrivingSide",
-            "modelAsString": true,
-            "values": [
-              {
-                "value": "LEFT",
-                "description": "Left side."
-              },
-              {
-                "value": "RIGHT",
-                "description": "Right side."
-              }
-            ]
-          }
-        },
-        "maneuver": {
-          "description": "A code identifying the maneuver.",
-          "type": "string",
-          "readOnly": true,
-          "enum": [
-            "ARRIVE",
-            "ARRIVE_LEFT",
-            "ARRIVE_RIGHT",
-            "DEPART",
-            "STRAIGHT",
-            "KEEP_RIGHT",
-            "BEAR_RIGHT",
-            "TURN_RIGHT",
-            "SHARP_RIGHT",
-            "KEEP_LEFT",
-            "BEAR_LEFT",
-            "TURN_LEFT",
-            "SHARP_LEFT",
-            "MAKE_UTURN",
-            "ENTER_MOTORWAY",
-            "ENTER_FREEWAY",
-            "ENTER_HIGHWAY",
-            "TAKE_EXIT",
-            "MOTORWAY_EXIT_LEFT",
-            "MOTORWAY_EXIT_RIGHT",
-            "TAKE_FERRY",
-            "ROUNDABOUT_CROSS",
-            "ROUNDABOUT_RIGHT",
-            "ROUNDABOUT_LEFT",
-            "ROUNDABOUT_BACK",
-            "TRY_MAKE_UTURN",
-            "FOLLOW",
-            "SWITCH_PARALLEL_ROAD",
-            "SWITCH_MAIN_ROAD",
-            "ENTRANCE_RAMP",
-            "WAYPOINT_LEFT",
-            "WAYPOINT_RIGHT",
-            "WAYPOINT_REACHED"
-          ],
-          "x-ms-enum": {
-            "name": "GuidanceManeuver",
-            "modelAsString": true,
-            "values": [
-              {
-                "value": "ARRIVE",
-                "name": "Arrive",
-                "description": "You have arrived."
-              },
-              {
-                "value": "ARRIVE_LEFT",
-                "name": "ArriveLeft",
-                "description": "You have arrived. Your destination is on the left."
-              },
-              {
-                "value": "ARRIVE_RIGHT",
-                "name": "ArriveRight",
-                "description": "You have arrived. Your destination is on the right."
-              },
-              {
-                "value": "DEPART",
-                "name": "Depart",
-                "description": "Leave."
-              },
-              {
-                "value": "STRAIGHT",
-                "name": "Straight",
-                "description": "Keep straight on."
-              },
-              {
-                "value": "KEEP_RIGHT",
-                "name": "KeepRight",
-                "description": "Keep right."
-              },
-              {
-                "value": "BEAR_RIGHT",
-                "name": "BearRight",
-                "description": "Bear right."
-              },
-              {
-                "value": "TURN_RIGHT",
-                "name": "TurnRight",
-                "description": "Turn right."
-              },
-              {
-                "value": "SHARP_RIGHT",
-                "name": "SharpRight",
-                "description": "Turn sharp right."
-              },
-              {
-                "value": "KEEP_LEFT",
-                "name": "KeepLeft",
-                "description": "Keep left."
-              },
-              {
-                "value": "BEAR_LEFT",
-                "name": "BearLeft",
-                "description": "Bear left."
-              },
-              {
-                "value": "TURN_LEFT",
-                "name": "TurnLeft",
-                "description": "Turn left."
-              },
-              {
-                "value": "SHARP_LEFT",
-                "name": "SharpLeft",
-                "description": "Turn sharp left."
-              },
-              {
-                "value": "MAKE_UTURN",
-                "name": "MakeUTurn",
-                "description": "Make a U-turn."
-              },
-              {
-                "value": "ENTER_MOTORWAY",
-                "name": "EnterMotorway",
-                "description": "Take the motorway."
-              },
-              {
-                "value": "ENTER_FREEWAY",
-                "name": "EnterFreeway",
-                "description": "Take the freeway."
-              },
-              {
-                "value": "ENTER_HIGHWAY",
-                "name": "EnterHighway",
-                "description": "Take the highway."
-              },
-              {
-                "value": "TAKE_EXIT",
-                "name": "TakeExit",
-                "description": "Take the exit."
-              },
-              {
-                "value": "MOTORWAY_EXIT_LEFT",
-                "name": "MotorwayExitLeft",
-                "description": "Take the left exit."
-              },
-              {
-                "value": "MOTORWAY_EXIT_RIGHT",
-                "name": "MotorwayExitRight",
-                "description": "Take the right exit."
-              },
-              {
-                "value": "TAKE_FERRY",
-                "name": "TakeFerry",
-                "description": "Take the ferry."
-              },
-              {
-                "value": "ROUNDABOUT_CROSS",
-                "name": "RoundaboutCross",
-                "description": "Cross the roundabout."
-              },
-              {
-                "value": "ROUNDABOUT_RIGHT",
-                "name": "RoundaboutRight",
-                "description": "At the roundabout take the exit on the right."
-              },
-              {
-                "value": "ROUNDABOUT_LEFT",
-                "name": "RoundaboutLeft",
-                "description": "At the roundabout take the exit on the left."
-              },
-              {
-                "value": "ROUNDABOUT_BACK",
-                "name": "RoundaboutBack",
-                "description": "Go around the roundabout."
-              },
-              {
-                "value": "TRY_MAKE_UTURN",
-                "name": "TryMakeUTurn",
-                "description": "Try to make a U-turn."
-              },
-              {
-                "value": "FOLLOW",
-                "name": "Follow",
-                "description": "Follow."
-              },
-              {
-                "value": "SWITCH_PARALLEL_ROAD",
-                "name": "SwitchParallelRoad",
-                "description": "Switch to the parallel road."
-              },
-              {
-                "value": "SWITCH_MAIN_ROAD",
-                "name": "SwitchMainRoad",
-                "description": "Switch to the main road."
-              },
-              {
-                "value": "ENTRANCE_RAMP",
-                "name": "EntranceRamp",
-                "description": "Take the ramp."
-              },
-              {
-                "value": "WAYPOINT_LEFT",
-                "name": "WaypointLeft",
-                "description": "You have reached the waypoint. It is on the left."
-              },
-              {
-                "value": "WAYPOINT_RIGHT",
-                "name": "WaypointRight",
-                "description": "You have reached the waypoint. It is on the right."
-              },
-              {
-                "value": "WAYPOINT_REACHED",
-                "name": "WaypointReached",
-                "description": "You have reached the waypoint."
-              }
-            ]
-          }
-        },
-        "message": {
-          "description": "A human-readable message for the maneuver.",
-          "type": "string",
-          "readOnly": true
-        },
-        "combinedMessage": {
-          "description": "A human-readable message for the maneuver combined with the message from the next instruction. Sometimes it is possible to combine two successive instructions into a single instruction making it easier to follow. When this is the case the possibleCombineWithNext flag will be true. For example:\n\n```\n10. Turn left onto Einsteinweg/A10/E22 towards Ring Amsterdam\n11. Follow Einsteinweg/A10/E22 towards Ring Amsterdam\n```\n\nThe possibleCombineWithNext flag on instruction 10 is true. This indicates to the clients of coded guidance that it can be combined with instruction 11. The instructions will be combined automatically for clients requesting human-readable guidance. The combinedMessage field contains the combined message:\n\n```\nTurn left onto Einsteinweg/A10/E22 towards Ring Amsterdam\nthen follow Einsteinweg/A10/E22 towards Ring Amsterdam.\n```",
-          "type": "string",
-          "readOnly": true
-        }
-      }
-    },
-    "RouteInstructionGroup": {
-      "description": "Groups a sequence of instruction elements which are related to each other. The sequence range is constrained with firstInstructionIndex and lastInstructionIndex. When human-readable text messages are requested for guidance (instructionType=text or tagged), then the instructionGroup has a summary message returned when available.",
-      "type": "object",
-      "properties": {
-        "firstInstructionIndex": {
-          "description": "Index of the first instruction in the instructions and belonging to this group.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "lastInstructionIndex": {
-          "description": "Index of the last instruction in the instructions and belonging to this group.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "groupLengthInMeters": {
-          "description": "Length of the group.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "groupMessage": {
-          "description": "Summary message when human-readable text messages are requested for guidance (instructionType=text or tagged).",
-          "type": "string",
-          "readOnly": true
-        }
-      }
-    },
-    "RouteGuidance": {
-      "description": "Contains guidance related elements. This field is present only when guidance was requested and is available.",
-      "type": "object",
-      "readOnly": true,
-      "properties": {
-        "instructions": {
-          "description": "A list of instructions describing maneuvers.",
+        "routeSubLegs": {
+          "description": "Sub Legs array",
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/RouteInstruction"
+            "$ref": "#/definitions/RouteSubLeg"
           }
         },
-        "instructionGroups": {
-          "description": "Groups a sequence of instruction elements which are related to each other.",
+        "itineraryItems": {
+          "description": "Itinerary array",
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/RouteInstructionGroup"
+            "$ref": "#/definitions/ItineraryItem"
           }
         }
       }
     },
-    "RouteReport": {
-      "description": "Reports the effective settings used in the current call.",
-      "type": "object",
+    "RouteSubLeg": {
+      "description": "The physical distance covered by the sub-leg. The units are defined by the DistanceUnit field.",
       "properties": {
-        "effectiveSettings": {
-          "description": "Effective parameters or data used when calling this Route API.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/EffectiveSetting"
-          }
-        }
-      }
-    },
-    "EffectiveSetting": {
-      "description": "Effective parameter or data used when calling this Route API.",
-      "type": "object",
-      "properties": {
-        "key": {
-          "description": "Name of the parameter used.",
-          "type": "string",
+        "travelDistance": {
+          "description": "The physical distance in meters covered by a route leg.",
+          "type": "number",
           "readOnly": true
         },
-        "value": {
-          "description": "Value of the parameter used.",
-          "type": "string",
+        "travelDuration": {
+          "description": "The time, in seconds, that it takes to travel the corresponding TravelDistance.",
+          "type": "integer",
           "readOnly": true
+        },
+        "startWaypoint": {
+          "$ref": "#/definitions/Waypoint"
+        },
+        "endWaypoint": {
+          "$ref": "#/definitions/Waypoint"
         }
       }
     },
-    "CalculateRouteBatchResponse": {
+    "Waypoint": {
+      "description": "These fields are found within the StartWaypoint and EndWaypoint collections of a RouteSubLeg.",
+      "properties": {
+        "geometry": {
+          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+        },
+        "description": {
+          "description": "A short description identifying the waypoint.",
+          "type": "string"
+        },
+        "isVia": {
+          "description": "A value of true indicates that this is a via-waypoint.",
+          "type": "boolean"
+        },
+        "routepathIndex": {
+          "description": "Specifies the route path point associated with the waypoint. You can get a list of route path points by setting the routeAttributes parameter to routePath.",
+          "type": "integer"
+        }
+      }
+    },
+    "RoutePath": {
+      "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points. For more information about the fields contained in a route Path, see the Route Path Fields section below. A RoutePath is returned only if one of the following parameters is set in the request. \n\n routeAttributes=routePath",
+      "properties": {
+        "geometry": {
+          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonLineString"
+        }
+      }
+    },
+    "ItineraryItem": {
+      "description": "These fields are found in the ItineraryItem collection. Each itinerary item provides information about a route step.",
+      "properties": {
+        "compassDirection": {
+          "description": "The direction of travel associated with a maneuver on a route, such as south or southwest.",
+          "type": "string"
+        },
+        "details": {
+          "$ref": "#/definitions/Details"
+        },
+        "exit": {
+          "description": "The name or number of the exit associated with this itinerary step.",
+          "type": "string"
+        },
+        "hints": {
+          "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
+          "type": "string"
+        },
+        "instruction": {
+          "description": "A description of a maneuver in a set of directions.",
+          "$ref": "#/definitions/Instruction"
+        },
+        "maneuverPoint": {
+          "description": "The coordinates of a point on the Earth where a maneuver is required, such as a left turn. A ManeuverPoint contains Latitude and Longitude elements.",
+          "properties": {
+            "geometry": {
+              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+            }
+          }
+        },
+        "sideOfStreet": {
+          "description": "sideOfStreet",
+          "$ref": "#/definitions/SideOfStreet"
+        },
+        "signs": {
+          "description": "Signage text for the route. There may be more than one sign value for an itinerary item.",
+          "type": "string"
+        },
+        "towardsRoadName": {
+          "description": "The name of the street that the route goes towards in the first itinerary item.",
+          "type": "string"
+        },
+        "travelDistance": {
+          "description": "The physical distance in meters covered by this route step.",
+          "type": "number"
+        },
+        "travelDuration": {
+          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
+          "type": "integer"
+        }
+      }
+    },
+    "Details": {
+      "description": "Information about one of the maneuvers that is part of the itinerary item. An ItineraryItem can contain more than one Detail collection. For information about the fields contained in a Detail collection.",
+      "properties": {
+        "compassDegrees": {
+          "description": "The direction in degrees.",
+          "type": "number"
+        },
+        "maneuverType": {
+          "description": "maneuverType",
+          "$ref": "#/definitions/ManeuverType"
+        },
+        "names": {
+          "description": "A street, highway or intersection where the maneuver occurs. If the maneuver is complex, there may be more than one name field in the details collection. The name field may also have no value. This can occur if the name is not known or if a street, highway or intersection does not have a name.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startPathIndices": {
+          "description": "These fields specify index values for specific route path points that are returned in the response when a route path is returned. Together, these two index values define a range of route path points that correspond to a maneuver. Route path index values are integers where the first route path point has an index value of 0.",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "endPathIndices": {
+          "description": "These fields specify index values for specific route path points that are returned in the response when a route path is returned. Together, these two index values define a range of route path points that correspond to a maneuver. Route path index values are integers where the first route path point has an index value of 0.",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "roadType": {
+          "description": "type of road",
+          "$ref": "#/definitions/RoadType"
+        }
+      }
+    },
+    "RouteDirectionsBatchResponse": {
       "description": "This object is returned from a successful Route Directions Batch service call.",
       "type": "object",
       "allOf": [
@@ -1232,12 +829,12 @@
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/CalculateRouteBatchResponseItem"
+            "$ref": "#/definitions/RouteDirectionsBatchResponseItem"
           }
         }
       }
     },
-    "CalculateRouteBatchResponseItem": {
+    "RouteDirectionsBatchResponseItem": {
       "description": "An item returned from Route Directions Batch service call.",
       "type": "object",
       "allOf": [
@@ -1247,12 +844,12 @@
       ],
       "properties": {
         "response": {
-          "description": "The result of the query. CalculateRouteResponse if the query completed successfully, ErrorResponse otherwise.",
+          "description": "The result of the query. RouteDirectionsResponse if the query completed successfully, ErrorResponse otherwise.",
           "type": "object",
           "readOnly": true,
           "allOf": [
             {
-              "$ref": "#/definitions/CalculateRouteResponse"
+              "$ref": "#/definitions/RouteDirectionsResponse"
             },
             {
               "$ref": "../../../../../common-types/data-plane/v1/types.json#/definitions/ErrorResponse"
@@ -1273,103 +870,17 @@
       "readOnly": true,
       "format": "date-time"
     },
-    "ResponseSectionType": {
-      "description": "Section types of the reported route response",
-      "type": "string",
-      "readOnly": true,
-      "enum": [
-        "CAR_TRAIN",
-        "COUNTRY",
-        "FERRY",
-        "MOTORWAY",
-        "PEDESTRIAN",
-        "TOLL_ROAD",
-        "TOLL_VIGNETTE",
-        "TRAFFIC",
-        "TRAVEL_MODE",
-        "TUNNEL",
-        "CARPOOL",
-        "URBAN"
-      ],
-      "x-ms-enum": {
-        "name": "ResponseSectionType",
-        "modelAsString": true,
-        "values": [
-          {
-            "value": "CAR_TRAIN",
-            "name": "CarOrTrain",
-            "description": "Sections of the route that are cars or trains."
-          },
-          {
-            "value": "COUNTRY",
-            "name": "Country",
-            "description": "Sections indicating which countries the route is in."
-          },
-          {
-            "value": "FERRY",
-            "name": "Ferry",
-            "description": "Sections of the route that are ferries."
-          },
-          {
-            "value": "MOTORWAY",
-            "name": "Motorway",
-            "description": "Sections of the route that are motorways."
-          },
-          {
-            "value": "PEDESTRIAN",
-            "name": "Pedestrian",
-            "description": "Sections of the route that are only suited for pedestrians."
-          },
-          {
-            "value": "TOLL_ROAD",
-            "name": "TollRoad",
-            "description": "Sections of the route that require a toll to be payed."
-          },
-          {
-            "value": "TOLL_VIGNETTE",
-            "name": "TollVignette",
-            "description": "Sections of the route that require a toll vignette to be present."
-          },
-          {
-            "value": "TRAFFIC",
-            "name": "Traffic",
-            "description": "Sections of the route that contain traffic information."
-          },
-          {
-            "value": "TRAVEL_MODE",
-            "name": "TravelMode",
-            "description": "Sections in relation to the request parameter `travelMode`."
-          },
-          {
-            "value": "TUNNEL",
-            "name": "Tunnel",
-            "description": "Sections of the route that are tunnels."
-          },
-          {
-            "value": "CARPOOL",
-            "name": "Carpool",
-            "description": "Sections of the route that require use of carpool (HOV/High Occupancy Vehicle) lanes."
-          },
-          {
-            "value": "URBAN",
-            "name": "Urban",
-            "description": "Sections of the route that are located within urban areas."
-          }
-        ]
-      }
-    },
-    "ResponseTravelMode": {
-      "description": "Travel mode for the calculated route. The value will be set to `other` if the requested mode of transport is not possible in this section",
+    "TravelMode": {
+      "description": "Travel mode for the calculated route",
       "type": "string",
       "readOnly": true,
       "enum": [
         "driving",
         "truck",
-        "walking",
-        "transit"
+        "walking"
       ],
       "x-ms-enum": {
-        "name": "ResponseTravelMode",
+        "name": "TravelMode",
         "modelAsString": true,
         "values": [
           {
@@ -1383,92 +894,593 @@
           {
             "value": "walking",
             "description": "The returned routes are optimized for pedestrians, including the use of sidewalks."
-          },
-          {
-            "value": "transit",
-            "description": "The returned routes are optimized for public transportation, such as bus, train, ferry, and airline."
           }
         ]
       }
     },
-    "SimpleCategory": {
-      "description": "Type of the incident. Can currently be JAM, ROAD_WORK, ROAD_CLOSURE, or OTHER. See \"tec\" for detailed information.",
+    "ManeuverType": {
+      "description": "These fields are found in the ItineraryItem collection. Each itinerary item provides information about a route step.",
       "type": "string",
       "readOnly": true,
       "enum": [
-        "JAM",
-        "ROAD_WORK",
-        "ROAD_CLOSURE",
-        "OTHER"
+        "ArriveFinish",
+        "ArriveIntermediate",
+        "BearLeft",
+        "BearLeftThenBearLeft",
+        "BearLeftThenBearRight",
+        "BearLeftThenTurnLeft",
+        "BearLeftThenTurnRight",
+        "BearRight",
+        "BearRightThenBearLeft",
+        "BearRightThenBearRight",
+        "BearRightThenTurnLeft",
+        "BearRightThenTurnRight",
+        "BearThenKeep",
+        "BearThenMerge",
+        "Continue",
+        "DepartIntermediateStop",
+        "DepartIntermediateStopReturning",
+        "DepartStart",
+        "EnterRoundabout",
+        "ExitRoundabout",
+        "EnterThenExitRoundabout",
+        "KeepLeft",
+        "KeepOnRampLeft",
+        "KeepOnRampRight",
+        "KeepOnRampStraight",
+        "KeepRight",
+        "KeepStraight",
+        "KeepToStayLeft",
+        "KeepToStayRight",
+        "KeepToStayStraight",
+        "Merge",
+        "None",
+        "RampThenHighwayLeft",
+        "RampThenHighwayRight",
+        "RampThenHighwayStraight",
+        "RoadNameChange",
+        "Take",
+        "TakeRampLeft",
+        "TakeRampRight",
+        "TakeRampStraight",
+        "TakeTransit",
+        "Transfer",
+        "TransitArrive",
+        "TransitDepart",
+        "TurnBack",
+        "TurnLeft",
+        "TurnLeftSharp",
+        "TurnLeftThenBearLeft",
+        "TurnLeftThenBearRight",
+        "TurnLeftThenTurnLeft",
+        "TurnLeftThenTurnRight",
+        "TurnRight",
+        "TurnRightSharp",
+        "TurnRightThenBearLeft",
+        "TurnRightThenBearRight",
+        "TurnRightThenTurnLeft",
+        "TurnRightThenTurnRight",
+        "TurnThenMerge",
+        "TurnToStayLeft",
+        "TurnToStayRight",
+        "Unknown",
+        "UTurn",
+        "Wait",
+        "Walk"
       ],
       "x-ms-enum": {
-        "name": "SimpleCategory",
+        "name": "ManeuverType",
         "modelAsString": true,
         "values": [
           {
-            "value": "JAM",
-            "name": "Jam",
-            "description": "Traffic jam."
+            "value": "ArriveFinish",
+            "name": "ArriveFinish",
+            "description": "Arrive at the final destination."
           },
           {
-            "value": "ROAD_WORK",
-            "name": "RoadWork",
-            "description": "Road work."
+            "value": "ArriveIntermediate",
+            "name": "ArriveIntermediate",
+            "description": "Arrive at an intermediate waypoint."
           },
           {
-            "value": "ROAD_CLOSURE",
-            "name": "RoadClosure",
-            "description": "Road closure."
+            "value": "BearLeft",
+            "name": "BearLeft",
+            "description": "Bear left."
           },
           {
-            "value": "OTHER",
-            "name": "Other",
-            "description": "Other."
+            "value": "BearLeftThenBearLeft",
+            "name": "BearLeftThenBearLeft",
+            "description": "Bear left and then bear left again."
+          },
+          {
+            "value": "BearLeftThenBearRight",
+            "name": "BearLeftThenBearRight",
+            "description": "Bear left and then bear right."
+          },
+          {
+            "value": "BearLeftThenTurnLeft",
+            "name": "BearLeftThenTurnLeft",
+            "description": "Bear left and then turn left."
+          },
+          {
+            "value": "BearLeftThenTurnRight",
+            "name": "BearLeftThenTurnRight",
+            "description": "Bear left and then turn right."
+          },
+          {
+            "value": "BearRight",
+            "name": "BearRight",
+            "description": "Bear right."
+          },
+          {
+            "value": "BearRightThenBearLeft",
+            "name": "BearRightThenBearLeft",
+            "description": "Bear right and then bear left."
+          },
+          {
+            "value": "BearRightThenBearRight",
+            "name": "BearRightThenBearRight",
+            "description": "Bear right and then bear right again."
+          },
+          {
+            "value": "BearRightThenTurnLeft",
+            "name": "BearRightThenTurnLeft",
+            "description": "Bear right and then turn left."
+          },
+          {
+            "value": "BearRightThenTurnRight",
+            "name": "BearRightThenTurnRight",
+            "description": "Bear right and then turn right."
+          },
+          {
+            "value": "DepartStart",
+            "name": "DepartStart",
+            "description": "Leave the starting point."
+          },
+          {
+            "value": "BearThenMerge",
+            "name": "BearThenMerge",
+            "description": "Bear instruction and then a merge instruction."
+          },
+          {
+            "value": "Continue",
+            "name": "Continue",
+            "description": "Continue on the current road."
+          },
+          {
+            "value": "DepartIntermediateStop",
+            "name": "DepartIntermediateStop",
+            "description": "Leave an intermediate waypoint in a different direction and road than you arrived on."
+          },
+          {
+            "value": "DepartIntermediateStopReturning",
+            "name": "DepartIntermediateStopReturning",
+            "description": "Leave an intermediate waypoint in the same direction and on the same road that you arrived on."
+          },
+          {
+            "value": "EnterRoundabout",
+            "name": "EnterRoundabout",
+            "description": "Enter a roundabout."
+          },
+          {
+            "value": "ExitRoundabout",
+            "name": "ExitRoundabout",
+            "description": "Exit a roundabout."
+          },
+          {
+            "value": "EnterThenExitRoundabout",
+            "name": "EnterThenExitRoundabout",
+            "description": "Enter and exit a roundabout."
+          },
+          {
+            "value": "KeepLeft",
+            "name": "KeepLeft",
+            "description": "Keep left onto a different road."
+          },
+          {
+            "value": "KeepOnRampLeft",
+            "name": "KeepOnRampLeft",
+            "description": "Keep left and continue onto ramp."
+          },
+          {
+            "value": "KeepOnRampRight",
+            "name": "KeepOnRampRight",
+            "description": "Keep right and continue onto ramp."
+          },
+          {
+            "value": "KeepOnRampStraight",
+            "name": "KeepOnRampStraight",
+            "description": "Keep straight and continue onto ramp."
+          },
+          {
+            "value": "KeepRight",
+            "name": "KeepRight",
+            "description": "Keep right onto a different road."
+          },
+          {
+            "value": "KeepStraight",
+            "name": "KeepStraight",
+            "description": "Keep straight onto a different road."
+          },
+          {
+            "value": "KeepToStayLeft",
+            "name": "KeepToStayLeft",
+            "description": "Keep left to stay on the same road."
+          },
+          {
+            "value": "KeepToStayRight",
+            "name": "KeepToStayRight",
+            "description": "Keep right to stay on the same road."
+          },
+          {
+            "value": "KeepToStayStraight",
+            "name": "KeepToStayStraight",
+            "description": "Keep straight to stay on the same road."
+          },
+          {
+            "value": "Merge",
+            "name": "Merge",
+            "description": "Merge onto a highway."
+          },
+          {
+            "value": "None",
+            "name": "None",
+            "description": "No instruction."
+          },
+          {
+            "value": "RampThenHighwayLeft",
+            "name": "RampThenHighwayLeft",
+            "description": "Take left ramp onto highway. This is part of a combined instruction."
+          },
+          {
+            "value": "RampThenHighwayRight",
+            "name": "RampThenHighwayRight",
+            "description": "Take right ramp onto highway. This is part of a combined instruction."
+          },
+          {
+            "value": "RampThenHighwayStraight",
+            "name": "RampThenHighwayStraight",
+            "description": "Stay straight to take ramp onto highway. This is part of a combined instruction."
+          },
+          {
+            "value": "RoadNameChange",
+            "name": "RoadNameChange",
+            "description": "Road name changes."
+          },
+          {
+            "value": "Take",
+            "name": "Take",
+            "description": "Take the road. This instruction is used when you are entering or exiting a ferry. For example the following two route instructions use the Take maneuver to tell the user to take the Seattle-Bainbridge ferry and then to exit the ferry onto Olympic Drive.\n Take Seattle-Bainbridge Ferry. Take Olympic Drive."
+          },
+          {
+            "value": "TakeRampLeft",
+            "name": "TakeRampLeft",
+            "description": "Take ramp to the left."
+          },
+          {
+            "value": "TakeRampRight",
+            "name": "TakeRampRight",
+            "description": "Take ramp to the right."
+          },
+          {
+            "value": "TakeRampStraight",
+            "name": "TakeRampStraight",
+            "description": "Stay straight to take ramp."
+          },
+          {
+            "value": "TakeTransit",
+            "name": "TakeTransit",
+            "description": "Take transit."
+          },
+          {
+            "value": "Transfer",
+            "name": "Transfer",
+            "description": "Transfer between public transit at transit stop."
+          },
+          {
+            "value": "TransitArrive",
+            "name": "TransitArrive",
+            "description": "Get off public transit at transit stop."
+          },
+          {
+            "value": "TransitDepart",
+            "name": "TransitDepart",
+            "description": "Get on public transit at transit stop."
+          },
+          {
+            "value": "TurnBack",
+            "name": "TurnBack",
+            "description": "Turn back sharply."
+          },
+          {
+            "value": "TurnLeft",
+            "name": "TurnLeft",
+            "description": "Turn left."
+          },
+          {
+            "value": "TurnLeftSharp",
+            "name": "TurnLeftSharp",
+            "description": "Take a sharp left turn."
+          },
+          {
+            "value": "TurnLeftThenBearLeft",
+            "name": "TurnLeftThenBearLeft",
+            "description": "Turn left and then bear left."
+          },
+          {
+            "value": "TurnLeftThenTurnRight",
+            "name": "TurnLeftThenTurnRight",
+            "description": "Turn left and then turn right."
+          },
+          {
+            "value": "TurnRight",
+            "name": "TurnRight",
+            "description": "Turn right."
+          },
+          {
+            "value": "TurnRightSharp",
+            "name": "TurnRightSharp",
+            "description": "Take a sharp right turn."
+          },
+          {
+            "value": "TurnRightThenBearLeft",
+            "name": "TurnRightThenBearLeft",
+            "description": "Turn right and then bear left."
+          },
+          {
+            "value": "TurnRightThenBearRight",
+            "name": "TurnRightThenBearRight",
+            "description": "Turn right and then bear right."
+          },
+          {
+            "value": "TurnRightThenTurnLeft",
+            "name": "TurnRightThenTurnLeft",
+            "description": "Turn right and then turn left."
+          },
+          {
+            "value": "TurnRightThenTurnRight",
+            "name": "TurnRightThenTurnRight",
+            "description": "Turn right and then turn right again"
+          },
+          {
+            "value": "TurnThenMerge",
+            "name": "TurnThenMerge",
+            "description": "Turn instruction followed by a merge instruction."
+          },
+          {
+            "value": "TurnToStayLeft",
+            "name": "TurnToStayLeft",
+            "description": "Turn left to stay on the same road."
+          },
+          {
+            "value": "TurnToStayRight",
+            "name": "TurnToStayRight",
+            "description": "Turn right to stay on the same road."
+          },
+          {
+            "value": "Unknown",
+            "name": "Unknown",
+            "description": "The instruction is unknown."
+          },
+          {
+            "value": "UTurn",
+            "name": "UTurn",
+            "description": "Make a u-turn to go in the opposite direction."
+          },
+          {
+            "value": "Wait",
+            "name": "Wait",
+            "description": "Wait"
+          },
+          {
+            "value": "Walk",
+            "name": "Walk",
+            "description": "Walk"
           }
         ]
       }
     },
-    "DelayMagnitude": {
-      "description": "The magnitude of delay caused by the incident. These values correspond to the values of the response field ty of the [Get Traffic Incident Detail API](https://docs.microsoft.com/rest/api/maps/traffic/gettrafficincidentdetail). ",
-      "readOnly": true,
+    "RoadType": {
+      "description": "The type of road",
       "type": "string",
       "enum": [
-        "0",
-        "1",
-        "2",
-        "3",
-        "4"
+        "NotApplicable",
+        "LimitedAccessHighway",
+        "Highway",
+        "MajorRoad",
+        "Arterial",
+        "Street",
+        "Ramp",
+        "Ferry",
+        "WalkingPath"
       ],
       "x-ms-enum": {
-        "name": "DelayMagnitude",
+        "name": "RoadType",
         "modelAsString": true,
         "values": [
           {
-            "value": "0",
+            "value": "NotApplicable",
+            "name": "NotApplicable",
+            "description": "NotApplicable."
+          },
+          {
+            "value": "LimitedAccessHighway",
+            "name": "LimitedAccessHighway",
+            "description": "LimitedAccessHighway."
+          },
+          {
+            "value": "Highway",
+            "name": "Highway",
+            "description": "Highway."
+          },
+          {
+            "value": "MajorRoad",
+            "name": "MajorRoad",
+            "description": "MajorRoad."
+          },
+          {
+            "value": "Arterial",
+            "name": "Arterial",
+            "description": "Arterial."
+          },
+          {
+            "value": "Street",
+            "name": "Street",
+            "description": "Street."
+          },
+          {
+            "value": "Ramp",
+            "name": "Ramp",
+            "description": "Ramp."
+          },
+          {
+            "value": "Ferry",
+            "name": "Ferry",
+            "description": "Ferry."
+          },
+          {
+            "value": "WalkingPath",
+            "name": "WalkingPath",
+            "description": "WalkingPath."
+          }
+        ]
+      }
+    },
+    "SideOfStreet": {
+      "description": "The side of the street where the destination is found based on the arrival direction. This field applies to the last itinerary item only.",
+      "type": "string",
+      "enum": [
+        "Left",
+        "Right",
+        "Unknown"
+      ],
+      "x-ms-enum": {
+        "name": "SideOfStreet",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "Left",
+            "name": "Left",
+            "description": "Left."
+          },
+          {
+            "value": "Right",
+            "name": "Right",
+            "description": "Right."
+          },
+          {
+            "value": "Unknown",
+            "name": "Unknown",
+            "description": "Unknown."
+          }
+        ]
+      }
+    },
+    "TrafficDataUsed": {
+      "description": "The type of real-time traffic data used to generate the route.",
+      "type": "string",
+      "enum": [
+        "None",
+        "Flow",
+        "Closure",
+        "FlowAndClosure"
+      ],
+      "x-ms-enum": {
+        "name": "TrafficDataUsed",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "None",
+            "name": "None",
+            "description": "None."
+          },
+          {
+            "value": "Flow",
+            "name": "Flow",
+            "description": "Real-time traffic speeds used to calculate travel time."
+          },
+          {
+            "value": "Closure",
+            "name": "Closure",
+            "description": "Real-time closure data used, if applicable."
+          },
+          {
+            "value": "FlowAndClosure",
+            "name": "FlowAndClosure",
+            "description": "Flow and Closure."
+          }
+        ]
+      }
+    },
+    "TrafficCongestion": {
+      "description": "The level of traffic congestion along the route.",
+      "type": "string",
+      "enum": [
+        "Unknown",
+        "None",
+        "Mild",
+        "Medium",
+        "Heavy"
+      ],
+      "x-ms-enum": {
+        "name": "TrafficCongestion",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "Unknown",
             "name": "Unknown",
             "description": "Unknown."
           },
           {
-            "value": "1",
-            "name": "Minor",
-            "description": "Minor."
+            "value": "None",
+            "name": "None",
+            "description": "None."
           },
           {
-            "value": "2",
-            "name": "Moderate",
-            "description": "Moderate."
+            "value": "Mild",
+            "name": "Mild",
+            "description": "Mild."
           },
           {
-            "value": "3",
-            "name": "Major",
-            "description": "Major."
+            "value": "Medium",
+            "name": "Medium",
+            "description": "Medium."
           },
           {
-            "value": "4",
-            "name": "Undefined",
-            "description": "Undefined, used for road closures and other indefinite delays."
+            "value": "Heavy",
+            "name": "Heavy",
+            "description": "Heavy."
           }
         ]
+      }
+    },
+    "Instruction": {
+      "description": "A description of a maneuver in a set of directions.",
+      "properties": {
+        "maneuverType": {
+          "$ref": "#/definitions/ManeuverType"
+        },
+        "text": {
+          "description": "The plain text description of the instruction.",
+          "type": "string"
+        },
+        "formattedText": {
+          "description": "The formatted text description of the instruction.",
+          "type": "string"
+        }
+      }
+    },
+    "BatchRequest": {
+      "description": "This type represents the request body for the Batch service.",
+      "type": "object",
+      "properties": {
+        "batchItems": {
+          "description": "The list of queries to process.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RouteDirectionsRequest"
+          }
+        }
       }
     }
   }
