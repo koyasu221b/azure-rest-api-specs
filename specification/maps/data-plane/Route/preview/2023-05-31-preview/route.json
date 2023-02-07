@@ -201,7 +201,7 @@
           "description": "waypoints array",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/WaypointAndViaWaypoint"
+            "$ref": "#/definitions/Waypoint"
           }
         },
         "travelMode": {
@@ -242,8 +242,8 @@
           "type": "string",
           "format": "date-time"
         },
-        "optimize": {
-          "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with routeType shortest. Notice that origin and destination are excluded from the optimized waypoint indices. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints.",
+        "routeOptimization": {
+          "description": "Specifies what parameters to use to optimize the route.",
           "type": "string",
           "default": "fastestWithoutTraffic",
           "enum": [
@@ -253,7 +253,7 @@
             "fastestWithTraffic"
           ],
           "x-ms-enum": {
-            "name": "Optimize",
+            "name": "RouteOptimization",
             "modelAsString": true,
             "values": [
               {
@@ -279,7 +279,7 @@
             ]
           }
         },
-        "optimizeWaypoints": {
+        "optimizeWaypointOrder": {
           "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with optimize _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the waypoints in the given order and not allowed to be used in conjunction with routeRepresentation _none_. `Note`:This parameter is only available for the driving and Truck mode.",
           "type": "boolean",
           "default": false
@@ -334,22 +334,21 @@
             }
           }
         },
-        "routeInfo": {
-          "description": "Information of route being returned. Can specify multiple values such as \"routeInfo\": [\"routePath\", \"excludeDetailedInstructions\"].",
+        "routeOptions": {
+          "description": "Information of route being returned. Can specify multiple values such as \"routeOptions\": [\"includeRoutePath\", \"excludeDetailedInstructions\"].",
           "type": "array",
-          "default": ["all"],
+          "default": ["includeRoutePath","excludeItinerary"],
           "items": {
             "type": "string",
             "enum": [
+              "includeRoutePath",
+              "includeRegionTravelSummary",
               "excludeItinerary",
               "excludeDetailedInstructions",
-              "routePath",
-              "routeSummariesOnly",
-              "regionTravelSummary",
-              "all"
+              "RouteSummariesOnly"
             ],
             "x-ms-enum": {
-              "name": "RouteInfo",
+              "name": "RouteOptions",
               "modelAsString": true,
               "values": [
                 {
@@ -385,132 +384,20 @@
           "type": "boolean",
           "default": false
         },
-        "maxSolutions": {
+        "maxRouteCount": {
           "description": "Number of maximal routes to be calculated. Default: 1, minimum: 1 and maximum: 3",
           "type": "integer",
           "minimum": 1,
           "maximum": 3
         },
-        "itineraryGroups": {
+        "includeItineraryGroups": {
           "description": "Specifies whether the response include information about itinerary groups (continuous itinerary items in same travel mode are usually grouped together).",
           "type": "boolean",
           "default": false
         },
-        "vehicleHeading": {
-          "description": "The directional heading of the vehicle in degrees starting at true North and continuing in clockwise direction. North is 0 degrees, east is 90 degrees, south is 180 degrees, west is 270 degrees. Possible values 0-359",
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 359
-        },
-        "vehicleLength": {
-          "description": "Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. `Note`: The parameter is available only for truck mode.",
-          "type": "number",
-          "format": "double",
-          "default": 0
-        },
-        "vehicleWidth": {
-          "description": "Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. `Note`: The parameter is available only for truck mode.",
-          "type": "number",
-          "format": "double",
-          "default": 0
-        },
-        "vehicleHeight": {
-          "description": "Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. `Note`: The parameter is available only for truck mode.",
-          "type": "number",
-          "format": "double",
-          "default": 0
-        },
-        "vehicleWeight": {
-          "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck travel mode.",
-          "type": "integer",
-          "default": 0
-        },
-        "vehicleMaxSpeed": {
-          "description": "Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. \n\n* A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.\n\n* A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour. `Note`: The parameter is available only for truck mode.",
-          "type": "integer",
-          "default": 0
-        },
-        "vehicleAxleCount": {
-          "description": "Number of axles of the vehicle in kg. A value of 0 means that count of axle restriction is not considered. `Note`: The parameter is available only for truck mode.",
-          "type": "integer",
-          "default": 0
-        },
-        "vehicleAxleWeight": {
-          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck travel mode.",
-          "type": "integer",
-          "default": 0
-        },
-        "vehicleLoadType": {
-          "description": "Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. `Note`: The parameter is available only for truck mode.",
-          "type": "string",
-          "enum": [
-            "USHazmatClass1",
-            "USHazmatClass2",
-            "USHazmatClass3",
-            "USHazmatClass4",
-            "USHazmatClass5",
-            "USHazmatClass6",
-            "USHazmatClass7",
-            "USHazmatClass8",
-            "USHazmatClass9",
-            "otherHazmatExplosive",
-            "otherHazmatGeneral",
-            "otherHazmatHarmfulToWater"
-          ],
-          "x-ms-enum": {
-            "name": "VehicleLoadType",
-            "modelAsString": true,
-            "values": [
-              {
-                "value": "USHazmatClass1",
-                "description": "Explosives"
-              },
-              {
-                "value": "USHazmatClass2",
-                "description": "Compressed gas"
-              },
-              {
-                "value": "USHazmatClass3",
-                "description": "Flammable liquids"
-              },
-              {
-                "value": "USHazmatClass4",
-                "description": "Flammable solids"
-              },
-              {
-                "value": "USHazmatClass5",
-                "description": "Oxidizers"
-              },
-              {
-                "value": "USHazmatClass6",
-                "description": "Poisons"
-              },
-              {
-                "value": "USHazmatClass7",
-                "description": "Radioactive"
-              },
-              {
-                "value": "USHazmatClass8",
-                "description": "Corrosives"
-              },
-              {
-                "value": "USHazmatClass9",
-                "description": "Miscellaneous"
-              },
-              {
-                "value": "otherHazmatExplosive",
-                "description": "Explosives"
-              },
-              {
-                "value": "otherHazmatGeneral",
-                "description": "Miscellaneous"
-              },
-              {
-                "value": "otherHazmatHarmfulToWater",
-                "description": "Harmful to water"
-              }
-            ]
-          }
+        "vehicleSpec": {
+          "description": "",
+          "$ref": "#/definitions/VehicleSpec"
         }
       }
     },
@@ -528,7 +415,7 @@
         }
       }
     },
-    "WaypointAndViaWaypoint": {
+    "Waypoint": {
       "description": "A route is defined by a set of waypoints",
       "type": "object",
       "properties": {
@@ -593,6 +480,10 @@
           "items": {
             "$ref": "#/definitions/RoutePath"
           }
+        },
+        "regionTravelSummary": {
+          "description": "regionTravelSummary",
+          "$ref": "#/definitions/RegionTravelSummary"
         }
       }
     },
@@ -601,12 +492,12 @@
       "type": "object",
       "readOnly": true,
       "properties": {
-        "lengthInMeters": {
+        "travelDistanceInMeters": {
           "description": "Length In Meters property",
           "type": "integer",
           "readOnly": true
         },
-        "travelTimeInSeconds": {
+        "travelDurationInSeconds": {
           "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
           "type": "integer",
           "readOnly": true
@@ -618,6 +509,37 @@
         }
       }
     },
+    "RegionTravelSummary": {
+      "description": "Travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada).",
+      "properties": {
+        "name": {
+          "description": "Country name",
+          "type": "string",
+          "readOnly": true
+        },
+        "subregions": {
+          "description": "SubRegions array",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/SubRegion"
+          }
+        }
+      }
+    },
+    "SubRegion": {
+      "description": "",
+      "properties": {
+        "name": {
+          "description": "sub region name",
+          "type": "string",
+          "readOnly": true
+        },
+        "summary": {
+          "$ref": "#/definitions/RouteSummary"
+        }
+      }
+    },
     "RouteLeg": {
       "description": "A description of a part of a route, comprised of a list of points. Each additional waypoint provided in the request will result in an additional leg in the returned route.",
       "type": "object",
@@ -626,12 +548,12 @@
           "description": "A short description of the route.",
           "type": "string"
         },
-        "travelDistance": {
+        "travelDistanceInMeters": {
           "description": "The physical distance in meters covered by a route leg.",
           "type": "number",
           "readOnly": true
         },
-        "travelDuration": {
+        "travelDurationInSeconds": {
           "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
           "type": "integer",
           "readOnly": true
@@ -679,25 +601,25 @@
     "RouteSubLeg": {
       "description": "The physical distance covered by the sub-leg. The units are defined by the DistanceUnit field.",
       "properties": {
-        "travelDistance": {
+        "travelDistanceInMeters": {
           "description": "The physical distance in meters covered by a route leg.",
           "type": "number",
           "readOnly": true
         },
-        "travelDuration": {
+        "travelDurationInSeconds": {
           "description": "The time, in seconds, that it takes to travel the corresponding TravelDistance.",
           "type": "integer",
           "readOnly": true
         },
         "startWaypoint": {
-          "$ref": "#/definitions/Waypoint"
+          "$ref": "#/definitions/WaypointOutput"
         },
         "endWaypoint": {
-          "$ref": "#/definitions/Waypoint"
+          "$ref": "#/definitions/WaypointOutput"
         }
       }
     },
-    "Waypoint": {
+    "WaypointOutput": {
       "description": "These fields are found within the StartWaypoint and EndWaypoint collections of a RouteSubLeg.",
       "properties": {
         "geometry": {
@@ -711,7 +633,7 @@
           "description": "A value of true indicates that this is a via-waypoint.",
           "type": "boolean"
         },
-        "routepathIndex": {
+        "routePathIndex": {
           "description": "Specifies the route path point associated with the waypoint. You can get a list of route path points by setting the routeAttributes parameter to routePath.",
           "type": "integer"
         }
@@ -1467,6 +1389,127 @@
         "formattedText": {
           "description": "The formatted text description of the instruction.",
           "type": "string"
+        }
+      }
+    },
+    "VehicleSpec": {
+      "description": "For truck routing, vehicle attributes are specified inside of a vehicleSpec object in POST requests. Different regions may have different definitions for the truck classification and types, e.g., light truck, medium truck, heavy truck, etc. To get the most accurate results of the route restrictions based on the truck specs, please specify the vehicle attributes.",
+      "properties": {
+        "heading": {
+          "description": "The directional heading of the vehicle in degrees starting at true North and continuing in clockwise direction. North is 0 degrees, east is 90 degrees, south is 180 degrees, west is 270 degrees. Possible values 0-359",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 359
+        },
+        "length": {
+          "description": "Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. `Note`: The parameter is available only for truck mode.",
+          "type": "number",
+          "format": "double",
+          "default": 0
+        },
+        "width": {
+          "description": "Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. `Note`: The parameter is available only for truck mode.",
+          "type": "number",
+          "format": "double",
+          "default": 0
+        },
+        "height": {
+          "description": "Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. `Note`: The parameter is available only for truck mode.",
+          "type": "number",
+          "format": "double",
+          "default": 0
+        },
+        "weight": {
+          "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck travel mode.",
+          "type": "integer",
+          "default": 0
+        },
+        "maxSpeed": {
+          "description": "Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. \n\n* A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.\n\n* A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour. `Note`: The parameter is available only for truck mode.",
+          "type": "integer",
+          "default": 0
+        },
+        "axleCount": {
+          "description": "Number of axles of the vehicle in kg. A value of 0 means that count of axle restriction is not considered. `Note`: The parameter is available only for truck mode.",
+          "type": "integer",
+          "default": 0
+        },
+        "axleWeight": {
+          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck travel mode.",
+          "type": "integer",
+          "default": 0
+        },
+        "loadType": {
+          "description": "Types of cargo that may be classified as hazardous materials and restricted from some roads. Available vehicleLoadType values are US Hazmat classes 1 through 9, plus generic classifications for use in other countries. Values beginning with USHazmat are for US routing while otherHazmat should be used for all other countries. vehicleLoadType can be specified multiple times. `Note`: The parameter is available only for truck mode.",
+          "type": "string",
+          "enum": [
+            "USHazmatClass1",
+            "USHazmatClass2",
+            "USHazmatClass3",
+            "USHazmatClass4",
+            "USHazmatClass5",
+            "USHazmatClass6",
+            "USHazmatClass7",
+            "USHazmatClass8",
+            "USHazmatClass9",
+            "otherHazmatExplosive",
+            "otherHazmatGeneral",
+            "otherHazmatHarmfulToWater"
+          ],
+          "x-ms-enum": {
+            "name": "VehicleLoadType",
+            "modelAsString": true,
+            "values": [
+              {
+                "value": "USHazmatClass1",
+                "description": "Explosives"
+              },
+              {
+                "value": "USHazmatClass2",
+                "description": "Compressed gas"
+              },
+              {
+                "value": "USHazmatClass3",
+                "description": "Flammable liquids"
+              },
+              {
+                "value": "USHazmatClass4",
+                "description": "Flammable solids"
+              },
+              {
+                "value": "USHazmatClass5",
+                "description": "Oxidizers"
+              },
+              {
+                "value": "USHazmatClass6",
+                "description": "Poisons"
+              },
+              {
+                "value": "USHazmatClass7",
+                "description": "Radioactive"
+              },
+              {
+                "value": "USHazmatClass8",
+                "description": "Corrosives"
+              },
+              {
+                "value": "USHazmatClass9",
+                "description": "Miscellaneous"
+              },
+              {
+                "value": "otherHazmatExplosive",
+                "description": "Explosives"
+              },
+              {
+                "value": "otherHazmatGeneral",
+                "description": "Miscellaneous"
+              },
+              {
+                "value": "otherHazmatHarmfulToWater",
+                "description": "Harmful to water"
+              }
+            ]
+          }
         }
       }
     },
