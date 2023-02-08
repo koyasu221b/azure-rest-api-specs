@@ -369,11 +369,7 @@
                 },
                 {
                   "value": "regionTravelSummary",
-                  "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada). This value can be specified along with all the other routeAttributes values above."
-                },
-                {
-                  "value": "all",
-                  "description": "Used to specify the following attributes as a group: routePath | excludeItinerary."
+                  "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada). `Note`:The parameter is available only for Driving and Walking travel mode"
                 }
               ]
             }
@@ -389,11 +385,6 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 3
-        },
-        "includeItineraryGroups": {
-          "description": "Specifies whether the response include information about itinerary groups (continuous itinerary items in same travel mode are usually grouped together).",
-          "type": "boolean",
-          "default": false
         },
         "vehicleSpec": {
           "description": "",
@@ -689,11 +680,11 @@
           "description": "The name of the street that the route goes towards in the first itinerary item.",
           "type": "string"
         },
-        "travelDistance": {
+        "travelDistanceInMeters": {
           "description": "The physical distance in meters covered by this route step.",
           "type": "number"
         },
-        "travelDuration": {
+        "travelDurationInSeconds": {
           "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
           "type": "integer"
         }
