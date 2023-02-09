@@ -420,7 +420,7 @@
           "type": "number",
           "format": "double"
         },
-        "isVia": {
+        "isViaWaypoint": {
           "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
           "type": "boolean",
           "default": false
@@ -617,7 +617,7 @@
           "description": "A short description identifying the waypoint.",
           "type": "string"
         },
-        "isVia": {
+        "isViaWaypoint": {
           "description": "A value of true indicates that this is a via-waypoint.",
           "type": "boolean"
         },
@@ -1384,45 +1384,52 @@
       "description": "For truck routing, vehicle attributes are specified inside of a vehicleSpec object in POST requests. Different regions may have different definitions for the truck classification and types, e.g., light truck, medium truck, heavy truck, etc. To get the most accurate results of the route restrictions based on the truck specs, please specify the vehicle attributes.",
       "properties": {
         "heading": {
+          "x-ms-client-name": "headingInDegrees",
           "description": "The directional heading of the vehicle in degrees starting at true North and continuing in clockwise direction. North is 0 degrees, east is 90 degrees, south is 180 degrees, west is 270 degrees. Possible values 0-359",
           "type": "integer",
           "minimum": 0,
           "maximum": 359
         },
         "length": {
+          "x-ms-client-name": "lengthInMeters",
           "description": "Length of the vehicle in meters. A value of 0 means that length restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "width": {
+          "x-ms-client-name": "widthInMeters",
           "description": "Width of the vehicle in meters. A value of 0 means that width restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "height": {
+          "x-ms-client-name": "heightInMeters",
           "description": "Height of the vehicle in meters. A value of 0 means that height restrictions are not considered. `Note`: The parameter is available only for truck mode.",
           "type": "number",
           "format": "double",
           "default": 0
         },
         "weight": {
+          "x-ms-client-name": "weightInKilograms",
           "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck travel mode.",
           "type": "integer",
           "default": 0
         },
         "maxSpeed": {
+          "x-ms-client-name": "maxSpeedInKilometersPerHour",
           "description": "Maximum speed of the vehicle in km/hour. The max speed in the vehicle profile is used to check whether a vehicle is allowed on motorways. \n\n* A value of 0 means that an appropriate value for the vehicle will be determined and applied during route planning.\n\n* A non-zero value may be overridden during route planning. For example, the current traffic flow is 60 km/hour. If the vehicle  maximum speed is set to 50 km/hour, the routing engine will consider 60 km/hour as this is the current situation.  If the maximum speed of the vehicle is provided as 80 km/hour but the current traffic flow is 60 km/hour, then routing engine will again use 60 km/hour. `Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
         "axleCount": {
-          "description": "Number of axles of the vehicle in kg. A value of 0 means that count of axle restriction is not considered. `Note`: The parameter is available only for truck mode.",
+          "description": "Number of axles of the vehicle. `Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
         "axleWeight": {
+          "x-ms-client-name": "axleWeightInKilograms",
           "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck travel mode.",
           "type": "integer",
           "default": 0
