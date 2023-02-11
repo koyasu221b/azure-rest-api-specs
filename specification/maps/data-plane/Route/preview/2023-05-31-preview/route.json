@@ -67,35 +67,6 @@
       "required": false,
       "type": "string",
       "x-ms-parameter-location": "client"
-    },
-    "Report": {
-      "name": "report",
-      "in": "query",
-      "description": "Specifies which data should be reported for diagnosis purposes. The only possible value is _effectiveSettings_. Reports the effective parameters or data used when calling the API. In the case of defaulted parameters the default will be reflected where the parameter was not specified by the caller.",
-      "type": "string",
-      "x-ms-parameter-location": "method",
-      "enum": [
-        "effectiveSettings"
-      ],
-      "x-ms-enum": {
-        "name": "Report",
-        "modelAsString": true,
-        "values": [
-          {
-            "value": "effectiveSettings",
-            "description": "Reports the effective parameters or data used when calling the API."
-          }
-        ]
-      }
-    },
-    "BatchId": {
-      "name": "batchId",
-      "x-ms-client-name": "batchId",
-      "description": "Batch id for querying the operation.",
-      "type": "string",
-      "in": "path",
-      "required": true,
-      "x-ms-parameter-location": "method"
     }
   },
   "paths": {
@@ -149,7 +120,7 @@
           "final-state-via": "original-uri"
         },
         "x-ms-examples": {
-          "Successfully retrieve the status for the route calculation batch request": {
+          "Successfully retrieve the status for the route directions batch request": {
             "$ref": "./examples/PostRouteDirectionsBatch.json"
           }
         },
@@ -163,7 +134,7 @@
           {
             "name": "routeDirectionsBatchRequest",
             "in": "body",
-            "description": "The list of route directions queries/requests to process. The list can contain a max of 700 queries for async and 100 queries for sync version and must contain at least 1 query.",
+            "description": "The list of route directions queries/requests to process. The list can contain a max of 100 queries for sync version and must contain at least 1 query.",
             "required": true,
             "schema": {
               "$ref": "#/definitions/BatchRequest"
@@ -193,12 +164,12 @@
   },
   "definitions": {
     "RouteDirectionsRequest": {
-      "description": "This object contains parameters to call CalculateRoute",
+      "description": "This object is the request body.",
       "type": "object",
       "required": ["waypoints"],
       "properties": {
         "waypoints": {
-          "description": "waypoints array",
+          "description": "waypoints and viaWaypoints array",
           "type": "array",
           "items": {
             "$ref": "#/definitions/Waypoint"
@@ -233,12 +204,12 @@
           }
         },
         "departAt": {
-          "description": "The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format (1996-12-19T16:39:57-08:00).",
+          "description": "The date and time of departure from the origin point. Departure times apart from now must be specified as a dateTime. When a time zone offset is not specified, it will be assumed to be that of the origin point. The departAt value must be in the future in the date-time format defined by (RFC 3339, section 5.6)[https://www.rfc-editor.org/rfc/rfc3339#section-5.6]. For example, `2022-06-01T09:30:00.000-07:00`",
           "type": "string",
           "format": "date-time"
         },
         "arriveAt": {
-          "description": "The date and time of arrival at the destination point. It must be specified as a dateTime. When a time zone offset is not specified it will be assumed to be that of the destination point. The arriveAt value must be in the future. The arriveAt parameter cannot be used in conjunction with departAt.",
+          "description": "The date and time of arrival at the destination point. It must be specified as a dateTime format defined by (RFC 3339, section 5.6)[https://www.rfc-editor.org/rfc/rfc3339#section-5.6]. When a time zone offset is not specified it will be assumed to be that of the destination point. The arriveAt value must be in the future. The arriveAt parameter cannot be used in conjunction with departAt.",
           "type": "string",
           "format": "date-time"
         },
@@ -280,12 +251,12 @@
           }
         },
         "optimizeWaypointOrder": {
-          "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Yields best results when used in conjunction with optimize _shortest_. Notice that origin and destination are excluded from the optimized waypoint indices. To include origin and destination in the response, please increase all the indices by 1 to account for the origin, and then add the destination as the final index. Possible values are true or false. True computes a better order if possible, but is not allowed to be used in conjunction with maxAlternatives value greater than 0 or in conjunction with circle waypoints. False will use the waypoints in the given order and not allowed to be used in conjunction with routeRepresentation _none_. `Note`:This parameter is only available for the driving and Truck mode.",
+          "description": "Re-order the route waypoints using a fast heuristic algorithm to reduce the route length. Notice that origin and destination are excluded from the optimized waypoint indices.Possible values are true or false. `Note`:This parameter is only available for the driving and Truck mode.",
           "type": "boolean",
           "default": false
         },
         "avoid": {
-          "description": "Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple items, for example, '\"avoid\": [\"highways\", \"tollRoads\"]'. Noted that minimizeHighways/minimizeTollRoads/borderCrossing are not supported when travelMode=truck.",
+          "description": "Specifies something that the route calculation should try to avoid when determining the route. Can be specified multiple items, for example, '\"avoid\": [\"highways\", \"tollRoads\"]'. Noted that tunnels are not supported for driving and walking mode.",
           "type": "array",
           "items": {
             "type": "string",
@@ -304,7 +275,7 @@
               "values": [
                 {
                   "value": "highways",
-                  "description": "Avoids the use of highways in the route.  `Note`:The parameter is available only for Driving and Walking travel mode"
+                  "description": "Avoids the use of highways in the route.  `Note`:The parameter is available only for driving and walking mode."
                 },
                 {
                   "value": "tollRoads",
@@ -316,7 +287,7 @@
                 },
                 {
                   "value": "minimizeHighways",
-                  "description": "Minimizes (tries to avoid) the use of highways in the route. Note: If you specify more than one option for a road type, then the most restrictive option is used. For example, if you set the avoid parameter to both highways and minimizeHighways, the highways option is used and all highways are avoided. `Note`:The parameter is available only for Driving and Walking travel mode"
+                  "description": "Minimizes (tries to avoid) the use of highways in the route. Note: If you specify more than one option for a road type, then the most restrictive option is used. For example, if you set the avoid parameter to both highways and minimizeHighways, the highways option is used and all highways are avoided. `Note`:The parameter is available only for driving and walking mode"
                 },
                 {
                   "value": "minimizeTollRoads",
@@ -324,7 +295,7 @@
                 },
                 {
                   "value": "tunnels",
-                  "description": "Avoids the use of tunnels in the route. `Note`:The parameter is available only for Truck travel mode"
+                  "description": "Avoids the use of tunnels in the route. `Note`:The parameter is available only for truck mode"
                 },
                 {
                   "value": "borderCrossings",
@@ -335,7 +306,7 @@
           }
         },
         "routeOutputOptions": {
-          "description": "Information of route being returned. Can specify multiple values such as \"routeOptions\": [\"includeRoutePath\", \"excludeDetailedInstructions\"].",
+          "description": "Information of route being returned. Can specify multiple values such as \"routeOutputOptions\": [\"includeRoutePath\", \"includeRegionTravelSummary\"].",
           "type": "array",
           "default": ["includeRoutePath","excludeItinerary"],
           "items": {
@@ -344,7 +315,6 @@
               "includeRoutePath",
               "includeRegionTravelSummary",
               "excludeItinerary",
-              "excludeDetailedInstructions",
               "RouteSummariesOnly"
             ],
             "x-ms-enum": {
@@ -356,10 +326,6 @@
                   "description": "Do not include detailed directions in the response. Detailed directions are provided as itinerary items and contain details such as written instructions and traffic location codes."
                 },
                 {
-                  "value": "excludeDetailedInstructions",
-                  "description": "Do not include detailed directions in the response in the itinerary items."
-                },
-                {
                   "value": "routePath",
                   "description": "Include a set of point (latitude and longitude) values that describe the route’s path in the response."
                 },
@@ -369,14 +335,14 @@
                 },
                 {
                   "value": "regionTravelSummary",
-                  "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada). `Note`:The parameter is available only for Driving and Walking travel mode"
+                  "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada). `Note`:The parameter is available only for driving and walking mode"
                 }
               ]
             }
           }
         },
         "isVehicleCommercial": {
-          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.\n  `Note`: The parameter is available only for truck travel mode",
+          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.\n  `Note`: The parameter is available only for truck mode",
           "type": "boolean",
           "default": false
         },
@@ -393,7 +359,7 @@
       }
     },
     "RouteDirectionsResponse": {
-      "description": "This object is returned from a successful CalculateRoute call",
+      "description": "This object is returned from a successful call",
       "type": "object",
       "properties": {
         "routes": {
@@ -407,7 +373,7 @@
       }
     },
     "Waypoint": {
-      "description": "A route is defined by a set of waypoints",
+      "description": "A route is defined by a set of waypoints and viaWaypoints (intermediate locations that the route must pass through). You can have a maximum of 25 waypoints, and a maximum of 10 viaWaypoints between each set of waypoints. The start and end points of the route cannot be viaWaypoints. For truck routes, viaWaypoints are not supported.",
       "type": "object",
       "properties": {
         "latitude": {
@@ -436,17 +402,17 @@
           "readOnly": true
         },
         "travelDistanceInMeters": {
-          "description": "Length In Meters property",
+          "description": "The physical distance in meters covered by the entire route.",
           "type": "integer",
           "readOnly": true
         },
         "travelDurationInSeconds": {
-          "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
+          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
           "type": "integer",
           "readOnly": true
         },
         "trafficDelayInSeconds": {
-          "description": "Estimated delay in seconds caused by the real-time incident(s) according to traffic information. For routes planned with departure time in the future, delays is always 0.",
+          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance with current traffic conditions. This value is always provided for the complete route and does not depend on the availability of traffic information.",
           "type": "integer",
           "readOnly": true
         },
@@ -461,7 +427,7 @@
           }
         },
         "trafficDataUsed": {
-          "description": "Real-time traffic data used to generate the route.",
+          "description": "The type of real-time traffic data used to generate the route.",
           "$ref": "#/definitions/TrafficDataUsed"
         },
         "trafficCongestion": {
@@ -469,7 +435,7 @@
           "$ref": "#/definitions/TrafficCongestion"
         },
         "routeLegs": {
-          "description": "Legs array",
+          "description": "Information about a section of a route between two waypoints. For more information about the fields contained ina routeLeg.",
           "type": "array",
           "readOnly": true,
           "items": {
@@ -477,7 +443,7 @@
           }
         },
         "routePath": {
-          "description": "Route path array",
+          "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points.",
           "type": "array",
           "readOnly": true,
           "items": {
@@ -485,7 +451,7 @@
           }
         },
         "regionTravelSummary": {
-          "description": "regionTravelSummary",
+          "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada).",
           "$ref": "#/definitions/RegionTravelSummary"
         }
       }
@@ -529,7 +495,7 @@
       }
     },
     "RouteLeg": {
-      "description": "A description of a part of a route, comprised of a list of points. Each additional waypoint provided in the request will result in an additional leg in the returned route.",
+      "description": "Information about a section of a route between two waypoints. For more information about the fields contained ina routeLeg.",
       "type": "object",
       "properties": {
         "description": {
@@ -542,7 +508,7 @@
           "readOnly": true
         },
         "travelDurationInSeconds": {
-          "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
+          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
           "type": "integer",
           "readOnly": true
         },
@@ -569,7 +535,7 @@
           }
         },
         "routeSubLegs": {
-          "description": "Sub Legs array",
+          "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
           "type": "array",
           "readOnly": true,
           "items": {
@@ -577,7 +543,7 @@
           }
         },
         "itineraryItems": {
-          "description": "Itinerary array",
+          "description": "Information that defines a step in the route.",
           "type": "array",
           "readOnly": true,
           "items": {
@@ -587,15 +553,15 @@
       }
     },
     "RouteSubLeg": {
-      "description": "The physical distance covered by the sub-leg. The units are defined by the DistanceUnit field.",
+      "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
       "properties": {
         "travelDistanceInMeters": {
-          "description": "The physical distance in meters covered by a route leg.",
+          "description": "The physical distance in meters covered by the sub-leg",
           "type": "number",
           "readOnly": true
         },
         "travelDurationInSeconds": {
-          "description": "The time, in seconds, that it takes to travel the corresponding TravelDistance.",
+          "description": "The time, in seconds, that it takes to travel the corresponding travelDistance by the sub-leg",
           "type": "integer",
           "readOnly": true
         },
@@ -622,13 +588,13 @@
           "type": "boolean"
         },
         "routePathIndex": {
-          "description": "Specifies the route path point associated with the waypoint. You can get a list of route path points by setting the routeAttributes parameter to routePath.",
+          "description": "Specifies the route path point associated with the waypoint. You can get a list of route path points by setting the routeOutputOptions=[\"includeRoutePath\"].",
           "type": "integer"
         }
       }
     },
     "RoutePath": {
-      "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points. For more information about the fields contained in a route Path, see the Route Path Fields section below. A RoutePath is returned only if one of the following parameters is set in the request. \n\n routeAttributes=routePath",
+      "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points. For more information about the fields contained in a route Path, see the Route Path Fields section below. A RoutePath is returned only if one of the following parameters is set in the request. \n\n routeOutputOptions=[\"includeRoutePath\"]",
       "properties": {
         "geometry": {
           "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonLineString"
@@ -636,14 +602,19 @@
       }
     },
     "ItineraryItem": {
-      "description": "These fields are found in the ItineraryItem collection. Each itinerary item provides information about a route step.",
+      "description": "Information that defines a step in the route.",
       "properties": {
         "compassDirection": {
           "description": "The direction of travel associated with a maneuver on a route, such as south or southwest.",
           "type": "string"
         },
         "details": {
-          "$ref": "#/definitions/Details"
+          "description": "Information about one of the maneuvers that is part of the itinerary item. An ItineraryItem can contain more than one Detail collection.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/Detail"
+          }
         },
         "exit": {
           "description": "The name or number of the exit associated with this itinerary step.",
@@ -651,7 +622,11 @@
         },
         "hints": {
           "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
-          "type": "string"
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/Hint"
+          }
         },
         "instruction": {
           "description": "A description of a maneuver in a set of directions.",
@@ -687,7 +662,20 @@
         }
       }
     },
-    "Details": {
+    "Hint": {
+      "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element.",
+      "properties": {
+        "hintType": {
+          "description": "hint type",
+          "type": "string"
+        },
+        "text": {
+          "description": "hint text",
+          "type": "string"
+        }
+      }
+    },
+    "Detail": {
       "description": "Information about one of the maneuvers that is part of the itinerary item. An ItineraryItem can contain more than one Detail collection. For information about the fields contained in a Detail collection.",
       "properties": {
         "compassDegrees": {
@@ -695,7 +683,7 @@
           "type": "number"
         },
         "maneuverType": {
-          "description": "maneuverType",
+          "description": "The type of maneuver described by this detail collection. The ManeuverType in A detail collection can provide information for a portion of the maneuver described by the maneuverType attribute of the corresponding Instruction. For example the maneuverType attribute of an Instruction may specify TurnLeftThenTurnRight as the maneuver while the associated detail items may specify specifics about the TurnLeft and TurnRight maneuvers.",
           "$ref": "#/definitions/ManeuverType"
         },
         "names": {
@@ -720,7 +708,7 @@
           }
         },
         "roadType": {
-          "description": "type of road",
+          "description": "Th type of road.",
           "$ref": "#/definitions/RoadType"
         }
       }
@@ -781,7 +769,7 @@
       "format": "date-time"
     },
     "TravelMode": {
-      "description": "Travel mode for the calculated route",
+      "description": "Travel mode.",
       "type": "string",
       "readOnly": true,
       "enum": [
@@ -809,7 +797,7 @@
       }
     },
     "ManeuverType": {
-      "description": "These fields are found in the ItineraryItem collection. Each itinerary item provides information about a route step.",
+      "description": "The type of maneuver described by this detail collection. The ManeuverType in A detail collection can provide information for a portion of the maneuver described by the maneuverType attribute of the corresponding Instruction. For example the maneuverType attribute of an Instruction may specify TurnLeftThenTurnRight as the maneuver while the associated detail items may specify specifics about the TurnLeft and TurnRight maneuvers.",
       "type": "string",
       "readOnly": true,
       "enum": [
@@ -1191,7 +1179,7 @@
       }
     },
     "RoadType": {
-      "description": "The type of road",
+      "description": "The type of road.",
       "type": "string",
       "enum": [
         "NotApplicable",
@@ -1381,7 +1369,7 @@
       }
     },
     "VehicleSpec": {
-      "description": "For truck routing, vehicle attributes are specified inside of a vehicleSpec object in POST requests. Different regions may have different definitions for the truck classification and types, e.g., light truck, medium truck, heavy truck, etc. To get the most accurate results of the route restrictions based on the truck specs, please specify the vehicle attributes.",
+      "description": "Vehicle attributes are specified inside of a vehicleSpec. Different regions may have different definitions for the truck classification and types, e.g., light truck, medium truck, heavy truck, etc. To get the most accurate results of the route restrictions based on the truck specs, please specify the vehicle attributes.",
       "properties": {
         "heading": {
           "x-ms-client-name": "headingInDegrees",
@@ -1413,7 +1401,7 @@
         },
         "weight": {
           "x-ms-client-name": "weightInKilograms",
-          "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck travel mode.",
+          "description": "Weight of the vehicle in kilograms. `Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
@@ -1430,7 +1418,7 @@
         },
         "axleWeight": {
           "x-ms-client-name": "axleWeightInKilograms",
-          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck travel mode.",
+          "description": "Weight per axle of the vehicle in kg. A value of 0 means that weight restrictions per axle are not considered.`Note`: The parameter is available only for truck mode.",
           "type": "integer",
           "default": 0
         },
@@ -1513,7 +1501,7 @@
       "type": "object",
       "properties": {
         "batchItems": {
-          "description": "The list of queries to process.",
+          "description": "The list of route requests to process.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/RouteDirectionsRequest"
