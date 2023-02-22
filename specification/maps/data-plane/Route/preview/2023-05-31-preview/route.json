@@ -172,7 +172,14 @@
           "description": "waypoints and viaWaypoints array",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Waypoint"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/WaypointWithLatLong"
+              },
+              {
+                "$ref": "#/definitions/WaypointWithAddress"
+              }
+            ]
           }
         },
         "travelMode": {
@@ -213,7 +220,7 @@
           "type": "string",
           "format": "date-time"
         },
-        "routeOptimization": {
+        "optimizeRoute": {
           "description": "Specifies what parameters to use to optimize the route.",
           "type": "string",
           "default": "fastestWithoutTraffic",
@@ -224,7 +231,7 @@
             "fastestWithTraffic"
           ],
           "x-ms-enum": {
-            "name": "RouteOptimization",
+            "name": "OptimizeRoute",
             "modelAsString": true,
             "values": [
               {
@@ -372,8 +379,39 @@
         }
       }
     },
-    "Waypoint": {
+    "WaypointWithLatLong": {
       "description": "A route is defined by a set of waypoints and viaWaypoints (intermediate locations that the route must pass through). You can have a maximum of 25 waypoints, and a maximum of 10 viaWaypoints between each set of waypoints. The start and end points of the route cannot be viaWaypoints. For truck routes, viaWaypoints are not supported.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "Location of the waypoint",
+          "type": "object",
+          "$ref": "#/definitions/Location"
+        },
+        "isViaWaypoint": {
+          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "WaypointWithAddress": {
+      "description": "A route is defined by a set of waypoints and viaWaypoints (intermediate locations that the route must pass through). You can have a maximum of 25 waypoints, and a maximum of 10 viaWaypoints between each set of waypoints. The start and end points of the route cannot be viaWaypoints. For truck routes, viaWaypoints are not supported.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "address of the waypoint",
+          "type": "string"
+        },
+        "isViaWaypoint": {
+          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "Location": {
+      "description": "Location of the waypoint",
       "type": "object",
       "properties": {
         "latitude": {
@@ -385,11 +423,6 @@
           "description": "Longitude property",
           "type": "number",
           "format": "double"
-        },
-        "isViaWaypoint": {
-          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
-          "type": "boolean",
-          "default": false
         }
       }
     },
@@ -416,16 +449,6 @@
           "type": "integer",
           "readOnly": true
         },
-        "bbox": {
-          "description": "Defines a rectangular area by using latitude and longitude boundaries that contain the corresponding route or location. A bounding box contains SouthLatitude, WestLongitude, NorthLatitude, and EastLongitude elements.",
-          "type": "array",
-          "readOnly": true,
-          "minItems": 4,
-          "maxItems": 4,
-          "items": {
-            "type": "number"
-          }
-        },
         "trafficDataUsed": {
           "description": "The type of real-time traffic data used to generate the route.",
           "$ref": "#/definitions/TrafficDataUsed"
@@ -449,10 +472,6 @@
           "items": {
             "$ref": "#/definitions/RoutePath"
           }
-        },
-        "regionTravelSummary": {
-          "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada).",
-          "$ref": "#/definitions/RegionTravelSummary"
         }
       }
     },
@@ -549,6 +568,10 @@
           "items": {
             "$ref": "#/definitions/ItineraryItem"
           }
+        },
+        "regionTravelSummary": {
+          "description": "Include travel summary of distance, time, and toll road distance by two entity types: country (e.g. US, Canada) and administrative division or subregion (e.g. “state” in US and “province” in Canada).",
+          "$ref": "#/definitions/RegionTravelSummary"
         }
       }
     },
@@ -596,6 +619,16 @@
     "RoutePath": {
       "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points. For more information about the fields contained in a route Path, see the Route Path Fields section below. A RoutePath is returned only if one of the following parameters is set in the request. \n\n routeOutputOptions=[\"includeRoutePath\"]",
       "properties": {
+        "bbox": {
+          "description": "Defines a rectangular area by using latitude and longitude boundaries that contain the corresponding route or location. A bounding box contains SouthLatitude, WestLongitude, NorthLatitude, and EastLongitude elements.",
+          "type": "array",
+          "readOnly": true,
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
         "geometry": {
           "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonLineString"
         }
