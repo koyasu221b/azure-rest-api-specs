@@ -369,13 +369,11 @@
       "description": "This object is returned from a successful call",
       "type": "object",
       "properties": {
-        "routes": {
-          "description": "Routes array",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/Route"
-          }
+        "type": {
+          "$ref": "#/definitions/FeatureCollectionType"
+        },
+        "features": {
+          "$ref": "#/definitions/Features"
         }
       }
     },
@@ -491,6 +489,129 @@
             "$ref": "#/definitions/SubRegion"
           }
         }
+      }
+    },
+    "FeatureCollectionType": {
+      "type": "string",
+      "enum": [
+        "FeatureCollection"
+      ],
+      "x-ms-enum": {
+        "name": "FeatureTypeEnum",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "FeatureCollection"
+          }
+        ]
+      }
+    },
+    "FeatureType": {
+      "type": "string",
+      "description": "must be Feature",
+      "enum": [
+        "Feature"
+      ],
+      "x-ms-enum": {
+        "name": "FeaturesItemTypeEnum",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "Feature"
+          }
+        ]
+      }
+    },
+    "Features": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ManeuverPointFeatureItem"
+          },
+          {
+            "$ref": "#/definitions/WaypointFeatureItem"
+          },
+          {
+            "$ref": "#/definitions/RoutePathFeatureItem"
+          }
+        ]
+      }
+    },
+    "ManeuverPointFeatureItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/FeatureType"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "maneuverPoint"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "WaypointFeatureItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/FeatureType"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "$ref": "#/definitions/FeaturePointType"
+            }
+          }
+        }
+      }
+    },
+    "RoutePathFeatureItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/FeatureType"
+        },
+        "properties": {
+        }
+      }
+    },
+    "FeaturePointType": {
+      "description": "point type",
+      "type": "string",
+      "readOnly": true,
+      "enum": [
+        "maneuverPoint",
+        "waypoint",
+        "viaWaypoint"
+      ],
+      "x-ms-enum": {
+        "name": "point type",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "maneuverPoint",
+            "description": "A maneuverPoint is a specific point on a route or trip where a change in direction or mode of transportation is required or recommended."
+          },
+          {
+            "value": "waypoint",
+            "description": "A waypoint is a specific location or point along a route or trip that serves as a reference or stopping point."
+          },
+          {
+            "value": "viaWaypoint",
+            "description": "A viaWaypoint is specific waypoint that must be passed through or visited along a route or trip."
+          }
+        ]
       }
     },
     "SubRegion": {
