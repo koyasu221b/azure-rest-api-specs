@@ -544,6 +544,9 @@
         "type": {
           "$ref": "#/definitions/FeatureType"
         },
+        "geometry": {
+          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+        },
         "properties": {
           "type": "object",
           "properties": {
@@ -555,6 +558,58 @@
                   "maneuverPoint"
                 ]
               }
+            },
+            "legIndex": {
+              "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
+              "type": "integer"
+            },
+            "compassDirection": {
+              "description": "The direction of travel associated with a maneuver on a route, such as south or southwest.",
+              "type": "string"
+            },
+            "details": {
+              "description": "Information about one of the maneuvers that is part of the itinerary item. An ItineraryItem can contain more than one Detail collection.",
+              "type": "array",
+              "readOnly": true,
+              "items": {
+                "$ref": "#/definitions/Detail"
+              }
+            },
+            "exit": {
+              "description": "The name or number of the exit associated with this itinerary step.",
+              "type": "string"
+            },
+            "hints": {
+              "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
+              "type": "array",
+              "readOnly": true,
+              "items": {
+                "$ref": "#/definitions/Hint"
+              }
+            },
+            "instruction": {
+              "description": "A description of a maneuver in a set of directions.",
+              "$ref": "#/definitions/Instruction"
+            },
+            "sideOfStreet": {
+              "description": "sideOfStreet",
+              "$ref": "#/definitions/SideOfStreet"
+            },
+            "signs": {
+              "description": "Signage text for the route. There may be more than one sign value for an itinerary item.",
+              "type": "string"
+            },
+            "towardsRoadName": {
+              "description": "The name of the street that the route goes towards in the first itinerary item.",
+              "type": "string"
+            },
+            "travelDistanceInMeters": {
+              "description": "The physical distance in meters covered by this route step.",
+              "type": "number"
+            },
+            "travelDurationInSeconds": {
+              "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
+              "type": "integer"
             }
           }
         }
@@ -566,11 +621,29 @@
         "type": {
           "$ref": "#/definitions/FeatureType"
         },
+        "geometry": {
+          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+        },
         "properties": {
           "type": "object",
           "properties": {
             "type": {
-              "$ref": "#/definitions/FeaturePointType"
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "waypoint",
+                  "viaWaypoint"
+                ]
+              }
+            },
+            "description": {
+              "description": "A short description identifying the waypoint.",
+              "type": "string"
+            },
+            "legIndex": {
+              "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
+              "type": "integer"
             }
           }
         }
@@ -582,7 +655,45 @@
         "type": {
           "$ref": "#/definitions/FeatureType"
         },
+        "geometry": {
+          "$ref": "../../../Common/preview/2023-05-31-preview/common.json#/definitions/GeoJsonMultiLineString"
+        },
         "properties": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "A unique ID for the resource.",
+              "type": "string"
+            },
+            "travelDistanceInMeters": {
+              "description": "The physical distance in meters covered by the entire route.",
+              "type": "integer"
+            },
+            "travelDurationInSeconds": {
+              "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
+              "type": "integer"
+            },
+            "trafficDelayInSeconds": {
+              "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance with current traffic conditions. This value is always provided for the complete route and does not depend on the availability of traffic information.",
+              "type": "integer"
+            },
+            "trafficDataUsed": {
+              "description": "The type of real-time traffic data used to generate the route.",
+              "$ref": "#/definitions/TrafficDataUsed"
+            },
+            "trafficCongestion": {
+              "description": "The level of traffic congestion along the route.",
+              "$ref": "#/definitions/TrafficCongestion"
+            },
+            "legs": {
+              "description": "An array of route legs. Check RouteLeg object description for more information.",
+              "type": "array",
+              "readOnly": true,
+              "items": {
+                "$ref": "#/definitions/RouteLeg"
+              }
+            }
+          }
         }
       }
     },
@@ -652,42 +763,12 @@
           "type": "integer",
           "readOnly": true
         },
-        "departureTime": {
-          "$ref": "#/definitions/DepartureTime"
-        },
-        "arrivalTime": {
-          "$ref": "#/definitions/ArrivalTime"
-        },
-        "actualStart": {
-          "description": "The Point (latitude and longitude) that was used as the actual starting location for the route leg. In most cases, the ActualStart is the same as the requested waypoint. However, if a waypoint is not close to a road, the Routes API chooses a location on the nearest road as the starting point of the route. This ActualStart element contains the latitude and longitude of this new location.",
-          "properties": {
-            "geometry": {
-              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
-            }
-          }
-        },
-        "actualEnd": {
-          "description": "The Point (latitude and longitude) that was used as the actual ending location for the route leg. In most cases, the ActualEnd is the same as the requested waypoint. However, if a waypoint is not close to a road, the Routes API chooses a location on the nearest road as the ending point of the route. This ActualEnd element contains the latitude and longitude of this new location.",
-          "properties": {
-            "geometry": {
-              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
-            }
-          }
-        },
-        "routeSubLegs": {
+        "steps": {
           "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/RouteSubLeg"
-          }
-        },
-        "itineraryItems": {
-          "description": "Information that defines a step in the route.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/ItineraryItem"
+            "$ref": "#/definitions/Step"
           }
         },
         "regionTravelSummary": {
@@ -696,9 +777,21 @@
         }
       }
     },
-    "RouteSubLeg": {
+    "Step": {
       "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
       "properties": {
+        "legIndex": {
+          "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
+          "type": "integer"
+        },
+        "startPathIndex": {
+          "description": "The index value at which the geometry starts in the leg geometry object.",
+          "type": "integer"
+        },
+        "endPathIndex": {
+          "description": "The index value at which the geometry ends in the leg geometry object.",
+          "type": "integer"
+        },
         "travelDistanceInMeters": {
           "description": "The physical distance in meters covered by the sub-leg",
           "type": "number",
@@ -708,12 +801,6 @@
           "description": "The time, in seconds, that it takes to travel the corresponding travelDistance by the sub-leg",
           "type": "integer",
           "readOnly": true
-        },
-        "startWaypoint": {
-          "$ref": "#/definitions/WaypointOutput"
-        },
-        "endWaypoint": {
-          "$ref": "#/definitions/WaypointOutput"
         }
       }
     },
@@ -752,67 +839,6 @@
         },
         "geometry": {
           "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonLineString"
-        }
-      }
-    },
-    "ItineraryItem": {
-      "description": "Information that defines a step in the route.",
-      "properties": {
-        "compassDirection": {
-          "description": "The direction of travel associated with a maneuver on a route, such as south or southwest.",
-          "type": "string"
-        },
-        "details": {
-          "description": "Information about one of the maneuvers that is part of the itinerary item. An ItineraryItem can contain more than one Detail collection.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/Detail"
-          }
-        },
-        "exit": {
-          "description": "The name or number of the exit associated with this itinerary step.",
-          "type": "string"
-        },
-        "hints": {
-          "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/Hint"
-          }
-        },
-        "instruction": {
-          "description": "A description of a maneuver in a set of directions.",
-          "$ref": "#/definitions/Instruction"
-        },
-        "maneuverPoint": {
-          "description": "The coordinates of a point on the Earth where a maneuver is required, such as a left turn. A ManeuverPoint contains Latitude and Longitude elements.",
-          "properties": {
-            "geometry": {
-              "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
-            }
-          }
-        },
-        "sideOfStreet": {
-          "description": "sideOfStreet",
-          "$ref": "#/definitions/SideOfStreet"
-        },
-        "signs": {
-          "description": "Signage text for the route. There may be more than one sign value for an itinerary item.",
-          "type": "string"
-        },
-        "towardsRoadName": {
-          "description": "The name of the street that the route goes towards in the first itinerary item.",
-          "type": "string"
-        },
-        "travelDistanceInMeters": {
-          "description": "The physical distance in meters covered by this route step.",
-          "type": "number"
-        },
-        "travelDurationInSeconds": {
-          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
-          "type": "integer"
         }
       }
     },
