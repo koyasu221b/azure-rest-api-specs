@@ -340,11 +340,6 @@
             }
           }
         },
-        "isVehicleCommercial": {
-          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.\n  `Note`: The parameter is available only for truck mode",
-          "type": "boolean",
-          "default": false
-        },
         "maxRouteCount": {
           "description": "Number of maximal routes to be calculated. Default: 1, minimum: 1 and maximum: 3",
           "type": "integer",
@@ -429,18 +424,18 @@
       "items": {
         "anyOf": [
           {
-            "$ref": "#/definitions/ManeuverPointFeatureItem"
+            "$ref": "#/definitions/OutputManeuverPointFeatureItem"
           },
           {
-            "$ref": "#/definitions/OutputWaypointFeatureItem"
+            "$ref": "#/definitions/OutputViaWaypointFeatureItem"
           },
           {
-            "$ref": "#/definitions/RoutePathFeatureItem"
+            "$ref": "#/definitions/OutputRoutePathFeatureItem"
           }
         ]
       }
     },
-    "ManeuverPointFeatureItem": {
+    "OutputManeuverPointFeatureItem": {
       "type": "object",
       "properties": {
         "type": {
@@ -458,13 +453,8 @@
                 "$ref": "#/definitions/ManeuverPointType"
               }
             },
-            "legIndex": {
-              "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
-              "type": "integer"
-            },
-            "pointPathIndex": {
-              "description": "Specifies the route path point associated with this maneuver point",
-              "type": "integer"
+            "legPointIndex": {
+              "$ref": "#/definitions/LegPointIndex"
             },
             "compassDirection": {
               "description": "The direction of travel associated with a maneuver on a route, such as south or southwest.",
@@ -476,18 +466,6 @@
               "readOnly": true,
               "items": {
                 "$ref": "#/definitions/Detail"
-              }
-            },
-            "exit": {
-              "description": "The name or number of the exit associated with this itinerary step.",
-              "type": "string"
-            },
-            "hints": {
-              "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
-              "type": "array",
-              "readOnly": true,
-              "items": {
-                "$ref": "#/definitions/Hint"
               }
             },
             "instruction": {
@@ -506,11 +484,15 @@
               "description": "The name of the street that the route goes towards in the first itinerary item.",
               "type": "string"
             },
-            "travelDistanceInMeters": {
+            "exit": {
+              "description": "The name or number of the exit associated with this itinerary step.",
+              "type": "string"
+            },
+            "distanceInMeters": {
               "description": "The physical distance in meters covered by this route step.",
               "type": "number"
             },
-            "travelDurationInSeconds": {
+            "durationInSeconds": {
               "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
               "type": "integer"
             }
@@ -518,7 +500,7 @@
         }
       }
     },
-    "OutputWaypointFeatureItem": {
+    "OutputViaWaypointFeatureItem": {
       "type": "object",
       "properties": {
         "type": {
@@ -533,7 +515,7 @@
             "type": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/WayPointType"
+                "$ref": "#/definitions/ViaWayPointType"
               }
             },
             "names": {
@@ -543,13 +525,8 @@
                 "type": "string"
               }
             },
-            "legIndex": {
-              "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
-              "type": "integer"
-            },
-            "pointPathIndex": {
-              "description": "Specifies the route path point associated with this waypoint",
-              "type": "integer"
+            "legPointIndex": {
+              "$ref": "#/definitions/LegPointIndex"
             }
           }
         }
@@ -578,7 +555,7 @@
         }
       }
     },
-    "RoutePathFeatureItem": {
+    "OutputRoutePathFeatureItem": {
       "type": "object",
       "properties": {
         "type": {
@@ -594,15 +571,15 @@
               "description": "A unique ID for the resource.",
               "type": "string"
             },
-            "travelDistanceInMeters": {
+            "distanceInMeters": {
               "description": "The physical distance in meters covered by the entire route.",
               "type": "integer"
             },
-            "travelDurationInSeconds": {
+            "durationInSeconds": {
               "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
               "type": "integer"
             },
-            "trafficDelayInSeconds": {
+            "delayInSeconds": {
               "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance with current traffic conditions. This value is always provided for the complete route and does not depend on the availability of traffic information.",
               "type": "integer"
             },
@@ -631,7 +608,8 @@
       "type": "string",
       "readOnly": true,
       "enum": [
-        "maneuverPoint"
+        "maneuverPoint",
+        "waypoint"
       ],
       "x-ms-enum": {
         "name": "point type",
@@ -640,6 +618,27 @@
           {
             "value": "maneuverPoint",
             "description": "A maneuverPoint is a specific point on a route or trip where a change in direction or mode of transportation is required or recommended."
+          },
+          {
+            "value": "waypoint",
+            "description": "A waypoint is a specific location or point along a route or trip that serves as a reference or stopping point."
+          }
+        ]
+      }
+    },
+    "ViaWayPointType": {
+      "description": "point type",
+      "type": "string",
+      "enum": [
+        "viaWaypoint"
+      ],
+      "x-ms-enum": {
+        "name": "point type",
+        "modelAsString": true,
+        "values": [
+          {
+            "value": "viaWaypoint",
+            "description": "A viaWaypoint is specific waypoint that must be passed through or visited along a route or trip."
           }
         ]
       }
@@ -674,12 +673,12 @@
           "type": "string",
           "readOnly": true
         },
-        "travelDistanceInMeters": {
+        "distanceInMeters": {
           "description": "Length In Meters property",
           "type": "integer",
           "readOnly": true
         },
-        "travelDurationInSeconds": {
+        "durationInSeconds": {
           "description": "Estimated travel time in seconds property that includes the delay due to real-time traffic. Note that even when traffic=false travelTimeInSeconds still includes the delay due to traffic. If DepartAt is in the future, travel time is calculated using time-dependent historic traffic data.",
           "type": "integer",
           "readOnly": true
@@ -694,7 +693,7 @@
           "description": "A short description of the route.",
           "type": "string"
         },
-        "travelDistanceInMeters": {
+        "distanceInMeters": {
           "description": "The physical distance in meters covered by a route leg.",
           "type": "number",
           "readOnly": true
@@ -721,29 +720,54 @@
     "SubLeg": {
       "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
       "properties": {
-        "legIndex": {
-          "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
-          "type": "integer"
+        "pathLegRange": {
+          "description": "Refers to the range covered by a specific leg of a route or path.",
+          "$ref": "#/definitions/PathLegRange"
         },
-        "startPathIndex": {
-          "description": "The index value at which the geometry starts in the leg geometry object.",
-          "type": "integer"
-        },
-        "endPathIndex": {
-          "description": "The index value at which the geometry ends in the leg geometry object.",
-          "type": "integer"
-        },
-        "travelDistanceInMeters": {
+        "distanceInMeters": {
           "description": "The physical distance in meters covered by the sub-leg",
           "type": "number",
           "readOnly": true
         },
-        "travelDurationInSeconds": {
+        "durationInSeconds": {
           "description": "The time, in seconds, that it takes to travel the corresponding travelDistance by the sub-leg",
           "type": "integer",
           "readOnly": true
         }
       }
+    },
+    "PathLegRange": {
+      "description": "Refers to the range covered by a specific leg of a route or path.",
+      "properties": {
+        "range": {
+          "description": "Refers to the range covered by a specific leg of a route or path.",
+          "type": "array",
+          "maximum": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer"
+          }
+        },
+        "legIndex": {
+          "$ref": "#/definitions/LegIndex"
+        }
+      }
+    },
+    "LegPointIndex": {
+      "description": "Refers to the index of a point within a specific leg of a route.",
+      "properties": {
+        "legIndex": {
+          "$ref": "#/definitions/LegIndex"
+        },
+        "index": {
+          "description": "index of a point within a specific leg",
+          "type": "integer"
+        }
+      }
+    },
+    "LegIndex": {
+      "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
+      "type": "integer"
     },
     "Hint": {
       "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element.",
@@ -776,19 +800,9 @@
             "type": "string"
           }
         },
-        "startPathIndices": {
-          "description": "These fields specify index values for specific route path points that are returned in the response when a route path is returned. Together, these two index values define a range of route path points that correspond to a maneuver. Route path index values are integers where the first route path point has an index value of 0.",
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
-        },
-        "endPathIndices": {
-          "description": "These fields specify index values for specific route path points that are returned in the response when a route path is returned. Together, these two index values define a range of route path points that correspond to a maneuver. Route path index values are integers where the first route path point has an index value of 0.",
-          "type": "array",
-          "items": {
-            "type": "number"
-          }
+        "pathLegRange": {
+          "description": "Refers to the range covered by a specific leg of a route or path.",
+          "$ref": "#/definitions/PathLegRange"
         },
         "roadType": {
           "description": "Th type of road.",
@@ -1448,12 +1462,25 @@
         "formattedText": {
           "description": "The formatted text description of the instruction.",
           "type": "string"
+        },
+        "hints": {
+          "description": "Additional information that may be helpful in following a route. In addition to the hint text, this element has an attribute hintType that specifies what the hint refers to, such as “NextIntersection.” Hint is an optional element and a route step can contain more than one hint.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/Hint"
+          }
         }
       }
     },
     "VehicleSpec": {
       "description": "Vehicle attributes are specified inside of a vehicleSpec. Different regions may have different definitions for the truck classification and types, e.g., light truck, medium truck, heavy truck, etc. To get the most accurate results of the route restrictions based on the truck specs, please specify the vehicle attributes.",
       "properties": {
+        "isVehicleCommercial": {
+          "description": "Whether the vehicle is used for commercial purposes. Commercial vehicles may not be allowed to drive on some roads.\n  `Note`: The parameter is available only for truck mode",
+          "type": "boolean",
+          "default": false
+        },
         "heading": {
           "x-ms-client-name": "headingInDegrees",
           "description": "The directional heading of the vehicle in degrees starting at true North and continuing in clockwise direction. North is 0 degrees, east is 90 degrees, south is 180 degrees, west is 270 degrees. Possible values 0-359",
