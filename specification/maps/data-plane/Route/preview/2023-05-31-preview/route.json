@@ -168,19 +168,11 @@
       "type": "object",
       "required": ["waypoints"],
       "properties": {
-        "waypoints": {
-          "description": "waypoints and viaWaypoints array",
-          "type": "array",
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/WaypointWithLatLong"
-              },
-              {
-                "$ref": "#/definitions/WaypointWithAddress"
-              }
-            ]
-          }
+        "type": {
+          "$ref": "#/definitions/FeatureCollectionType"
+        },
+        "features": {
+          "$ref": "#/definitions/InputFeatures"
         },
         "travelMode": {
           "description": "The mode of travel for the requested route.",
@@ -373,103 +365,7 @@
           "$ref": "#/definitions/FeatureCollectionType"
         },
         "features": {
-          "$ref": "#/definitions/Features"
-        }
-      }
-    },
-    "WaypointWithLatLong": {
-      "description": "A route is defined by a set of waypoints and viaWaypoints (intermediate locations that the route must pass through). You can have a maximum of 25 waypoints, and a maximum of 10 viaWaypoints between each set of waypoints. The start and end points of the route cannot be viaWaypoints. For truck routes, viaWaypoints are not supported.",
-      "type": "object",
-      "properties": {
-        "location": {
-          "description": "Location of the waypoint",
-          "type": "object",
-          "$ref": "#/definitions/Location"
-        },
-        "isViaWaypoint": {
-          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
-          "type": "boolean",
-          "default": false
-        }
-      }
-    },
-    "WaypointWithAddress": {
-      "description": "A route is defined by a set of waypoints and viaWaypoints (intermediate locations that the route must pass through). You can have a maximum of 25 waypoints, and a maximum of 10 viaWaypoints between each set of waypoints. The start and end points of the route cannot be viaWaypoints. For truck routes, viaWaypoints are not supported.",
-      "type": "object",
-      "properties": {
-        "location": {
-          "description": "address of the waypoint",
-          "type": "string"
-        },
-        "isViaWaypoint": {
-          "description": "Specifies this is the viaWayPoint. `Note`:The parameter is available only for driving and walking mode.",
-          "type": "boolean",
-          "default": false
-        }
-      }
-    },
-    "Location": {
-      "description": "Location of the waypoint",
-      "type": "object",
-      "properties": {
-        "latitude": {
-          "description": "Latitude property",
-          "type": "number",
-          "format": "double"
-        },
-        "longitude": {
-          "description": "Longitude property",
-          "type": "number",
-          "format": "double"
-        }
-      }
-    },
-    "Route": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "description": "A unique ID for the resource.",
-          "type": "string",
-          "readOnly": true
-        },
-        "travelDistanceInMeters": {
-          "description": "The physical distance in meters covered by the entire route.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "travelDurationInSeconds": {
-          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "trafficDelayInSeconds": {
-          "description": "The time that it takes, in seconds, to travel a corresponding TravelDistance with current traffic conditions. This value is always provided for the complete route and does not depend on the availability of traffic information.",
-          "type": "integer",
-          "readOnly": true
-        },
-        "trafficDataUsed": {
-          "description": "The type of real-time traffic data used to generate the route.",
-          "$ref": "#/definitions/TrafficDataUsed"
-        },
-        "trafficCongestion": {
-          "description": "The level of traffic congestion along the route.",
-          "$ref": "#/definitions/TrafficCongestion"
-        },
-        "routeLegs": {
-          "description": "Information about a section of a route between two waypoints. For more information about the fields contained ina routeLeg.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/RouteLeg"
-          }
-        },
-        "routePath": {
-          "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points.",
-          "type": "array",
-          "readOnly": true,
-          "items": {
-            "$ref": "#/definitions/RoutePath"
-          }
+          "$ref": "#/definitions/OutputFeatures"
         }
       }
     },
@@ -522,7 +418,13 @@
         ]
       }
     },
-    "Features": {
+    "InputFeatures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/InputWaypointFeatureItem"
+      }
+    },
+    "OutputFeatures": {
       "type": "array",
       "items": {
         "anyOf": [
@@ -530,7 +432,7 @@
             "$ref": "#/definitions/ManeuverPointFeatureItem"
           },
           {
-            "$ref": "#/definitions/WaypointFeatureItem"
+            "$ref": "#/definitions/OutputWaypointFeatureItem"
           },
           {
             "$ref": "#/definitions/RoutePathFeatureItem"
@@ -553,14 +455,15 @@
             "type": {
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "maneuverPoint"
-                ]
+                "$ref": "#/definitions/ManeuverPointType"
               }
             },
             "legIndex": {
               "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
+              "type": "integer"
+            },
+            "pointPathIndex": {
+              "description": "Specifies the route path point associated with this maneuver point",
               "type": "integer"
             },
             "compassDirection": {
@@ -615,7 +518,7 @@
         }
       }
     },
-    "WaypointFeatureItem": {
+    "OutputWaypointFeatureItem": {
       "type": "object",
       "properties": {
         "type": {
@@ -630,20 +533,46 @@
             "type": {
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "waypoint",
-                  "viaWaypoint"
-                ]
+                "$ref": "#/definitions/WayPointType"
               }
             },
-            "description": {
-              "description": "A short description identifying the waypoint.",
-              "type": "string"
+            "names": {
+              "description": "A street, highway or intersection where the maneuver occurs. If the maneuver is complex, there may be more than one name field in the details collection. The name field may also have no value. This can occur if the name is not known or if a street, highway or intersection does not have a name.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "legIndex": {
               "description": "The route leg index is a sequential number assigned to each leg of the route to help identify and distinguish between different segments of the route.",
               "type": "integer"
+            },
+            "pointPathIndex": {
+              "description": "Specifies the route path point associated with this waypoint",
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "InputWaypointFeatureItem": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/FeatureType"
+        },
+        "geometry": {
+          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "index": {
+              "description": "It is used to identify and order the sequence of waypoints in the route, allowing for accurate navigation along the designated path.",
+              "type": "integer"
+            },
+            "type": {
+              "$ref": "#/definitions/WayPointType"
             }
           }
         }
@@ -697,14 +626,12 @@
         }
       }
     },
-    "FeaturePointType": {
+    "ManeuverPointType": {
       "description": "point type",
       "type": "string",
       "readOnly": true,
       "enum": [
-        "maneuverPoint",
-        "waypoint",
-        "viaWaypoint"
+        "maneuverPoint"
       ],
       "x-ms-enum": {
         "name": "point type",
@@ -713,7 +640,21 @@
           {
             "value": "maneuverPoint",
             "description": "A maneuverPoint is a specific point on a route or trip where a change in direction or mode of transportation is required or recommended."
-          },
+          }
+        ]
+      }
+    },
+    "WayPointType": {
+      "description": "point type",
+      "type": "string",
+      "enum": [
+        "waypoint",
+        "viaWaypoint"
+      ],
+      "x-ms-enum": {
+        "name": "point type",
+        "modelAsString": true,
+        "values": [
           {
             "value": "waypoint",
             "description": "A waypoint is a specific location or point along a route or trip that serves as a reference or stopping point."
@@ -763,12 +704,12 @@
           "type": "integer",
           "readOnly": true
         },
-        "steps": {
+        "subLegs": {
           "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
           "type": "array",
           "readOnly": true,
           "items": {
-            "$ref": "#/definitions/Step"
+            "$ref": "#/definitions/SubLeg"
           }
         },
         "regionTravelSummary": {
@@ -777,7 +718,7 @@
         }
       }
     },
-    "Step": {
+    "SubLeg": {
       "description": "Information about a segments of the route leg defined by the route leg waypoints and any intermediate via-waypoints. For example, if the route leg has two via-waypoints in addition to start and end waypoints, there would be three (3) route sub-legs.",
       "properties": {
         "legIndex": {
@@ -801,44 +742,6 @@
           "description": "The time, in seconds, that it takes to travel the corresponding travelDistance by the sub-leg",
           "type": "integer",
           "readOnly": true
-        }
-      }
-    },
-    "WaypointOutput": {
-      "description": "These fields are found within the StartWaypoint and EndWaypoint collections of a RouteSubLeg.",
-      "properties": {
-        "geometry": {
-          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonPoint"
-        },
-        "description": {
-          "description": "A short description identifying the waypoint.",
-          "type": "string"
-        },
-        "isViaWaypoint": {
-          "description": "A value of true indicates that this is a via-waypoint.",
-          "type": "boolean"
-        },
-        "routePathIndex": {
-          "description": "Specifies the route path point associated with the waypoint. You can get a list of route path points by setting the routeOutputOptions=[\"includeRoutePath\"].",
-          "type": "integer"
-        }
-      }
-    },
-    "RoutePath": {
-      "description": "A representation of the path of a route. A RoutePath is defined by a Line element that contains of a collection of latitude and longitude points. The path of the route is the line that connects these points. For more information about the fields contained in a route Path, see the Route Path Fields section below. A RoutePath is returned only if one of the following parameters is set in the request. \n\n routeOutputOptions=[\"includeRoutePath\"]",
-      "properties": {
-        "bbox": {
-          "description": "Defines a rectangular area by using latitude and longitude boundaries that contain the corresponding route or location. A bounding box contains SouthLatitude, WestLongitude, NorthLatitude, and EastLongitude elements.",
-          "type": "array",
-          "readOnly": true,
-          "minItems": 4,
-          "maxItems": 4,
-          "items": {
-            "type": "number"
-          }
-        },
-        "geometry": {
-          "$ref": "../../../Common/preview/1.0/common.json#/definitions/GeoJsonLineString"
         }
       }
     },
